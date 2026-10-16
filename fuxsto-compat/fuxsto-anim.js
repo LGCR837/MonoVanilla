@@ -1,5 +1,5 @@
 /*!
- * fuxsto-anim.js  v1.0.0
+ * fuxsto-anim.js  v1.1.0
  * ------------------------------------------------------------------
  * design.fuxsto.cn 动画的兼容辅助脚本, 纯 ES5 / 无构建 / 无框架。
  *
@@ -13,6 +13,11 @@
  *   FxAnim.stagger(container, step, capMs) 给子元素写递增 animation-delay
  *   FxAnim.replay(el, className)           重播某个 .animate-* 动画
  *   FxAnim.reduced()                       当前是否处于 reduced-motion
+ *   FxAnim.overlayEnter(el, name)          浮层/通知「进入」(Vue Transition 等价)
+ *   FxAnim.overlayLeave(el, name, onDone)  浮层/通知「离开」
+ *   FxAnim.message(opts)                   命令式 Message (顶部堆叠, 自动消失)
+ *   FxAnim.notification(opts)              命令式 Notification (四方位堆叠)
+ *   FxAnim.closeAllMessages() / closeAllNotifs()  清空对应堆栈
  *
  * 兼容策略:
  *   - 优先使用 Element.animate() (Chrome 36+); 不可用时回退到
@@ -329,6 +334,251 @@
     }
   }
 
+  /* ============================================================
+   * 浮层 / 通知过渡 (对应原站 Vue <Transition> 钩子类名)
+   * 类名定义见 fuxsto-animations.css 第 6 节:
+   *   message-flip / notif-flip-{right,left,top,bottom}
+   *   dialog-pop / dialog-mask / drawer-{right,left,top,bottom} / drawer-mask
+   *   dropdown / alert-expand / alert-icon-pop / backtop-fade
+   * ============================================================ */
+
+  function _addClass(el, c) {
+    if (el.classList) { el.classList.add(c); }
+    else if (el.className.indexOf(c) === -1) { el.className += ' ' + c; }
+  }
+  function _removeClass(el, c) {
+    if (el.classList) { el.classList.remove(c); }
+    else {
+      var parts = el.className.split(/\s+/);
+      var next = '';
+      for (var i = 0; i < parts.length; i++) {
+        if (parts[i] && parts[i] !== c) { next += (next ? ' ' : '') + parts[i]; }
+      }
+      el.className = next;
+    }
+  }
+
+  /* 监听 transitionend, 超时时兜底 (transition 未发生 / 老浏览器) */
+  function _watchTransition(el, cb, timeoutMs) {
+    var done = false;
+    function fin() {
+      if (done) { return; }
+      done = true;
+      if (el.removeEventListener) { el.removeEventListener('transitionend', onEnd, false); }
+      cb();
+    }
+    function onEnd(e) {
+      if (e.target === el) { fin(); }
+    }
+    if (el.addEventListener) { el.addEventListener('transitionend', onEnd, false); }
+    setTimeout(fin, timeoutMs || 500);
+  }
+
+  /* 「进入」: 加 enter-active + enter-from, 强制重排后去掉 enter-from,
+     元素从 enter-from 过渡到自然状态 */
+  function overlayEnter(el, name) {
+    if (!el || !name) { return; }
+    _addClass(el, name + '-enter-active');
+    _addClass(el, name + '-enter-from');
+    el.offsetWidth;
+    if (reduced()) {
+      _removeClass(el, name + '-enter-from');
+      _removeClass(el, name + '-enter-active');
+      return;
+    }
+    raf(function () { _removeClass(el, name + '-enter-from'); });
+    _watchTransition(el, function () { _removeClass(el, name + '-enter-active'); }, 480);
+  }
+
+  /* 「离开」: 加 leave-active, 重排后加 leave-to, 过渡结束回调 onDone */
+  function overlayLeave(el, name, onDone) {
+    if (!el || !name) { if (onDone) { onDone(); } return; }
+    if (reduced()) {
+      _removeClass(el, name + '-enter-active');
+      if (onDone) { onDone(); }
+      return;
+    }
+    _addClass(el, name + '-leave-active');
+    el.offsetWidth;
+    raf(function () { _addClass(el, name + '-leave-to'); });
+    _watchTransition(el, function () {
+      _removeClass(el, name + '-leave-active');
+      _removeClass(el, name + '-leave-to');
+      if (onDone) { onDone(); }
+    }, 480);
+  }
+
+  /* ---- Message / Notification 命令式 API ---- */
+  var _msgStack = null;
+  var _notifStacks = {};
+
+  function _ensureMsgStack() {
+    if (!_msgStack) {
+      _msgStack = document.createElement('div');
+      _msgStack.className = 'fx-message-stack';
+      document.body.appendChild(_msgStack);
+    }
+    return _msgStack;
+  }
+  function _ensureNotifStack(side) {
+    if (!_notifStacks[side]) {
+      var st = document.createElement('div');
+      st.className = 'fx-notif-stack';
+      st.setAttribute('data-side', side);
+      document.body.appendChild(st);
+      _notifStacks[side] = st;
+    }
+    return _notifStacks[side];
+  }
+
+  /* 从堆栈中移除一项: 走 leave 过渡, 同时给兄弟项做 FLIP 位移,
+     复刻原站 transition-group 的 move 效果 */
+  function _flipDismiss(stack, el, name, onDone) {
+    var kids = stack.children;
+    var oldTops = [];
+    var idx = 0;
+    var i, k;
+    for (i = 0; i < kids.length; i++) {
+      oldTops[i] = kids[i].offsetTop;
+      if (kids[i] === el) { idx = i; }
+    }
+    _addClass(el, name + '-leave-active');
+    el.offsetWidth;
+    for (i = idx + 1; i < kids.length; i++) {
+      var delta = kids[i].offsetTop - oldTops[i];
+      if (delta !== 0) {
+        kids[i].style.webkitTransform = 'translateY(' + delta + 'px)';
+        kids[i].style.transform = 'translateY(' + delta + 'px)';
+        _addClass(kids[i], name + '-move');
+      }
+    }
+    stack.offsetWidth;
+    for (i = idx + 1; i < kids.length; i++) {
+      if (kids[i].style.transform) {
+        kids[i].style.transform = '';
+        kids[i].style.webkitTransform = '';
+      }
+    }
+    setTimeout(function () {
+      for (k = idx + 1; k < kids.length; k++) { _removeClass(kids[k], name + '-move'); }
+    }, 480);
+    _watchTransition(el, function () {
+      _removeClass(el, name + '-leave-active');
+      _removeClass(el, name + '-leave-to');
+      if (el.parentNode) { el.parentNode.removeChild(el); }
+      if (onDone) { onDone(); }
+    }, 480);
+  }
+
+  /* FxAnim.message({ type, text, duration, closable, onRemove }) */
+  function message(opts) {
+    opts = opts || {};
+    var type = opts.type || 'info';
+    var duration = opts.duration == null ? 3000 : opts.duration;
+    var stack = _ensureMsgStack();
+    var el = document.createElement('div');
+    el.className = 'fx-message';
+    el.setAttribute('data-type', type);
+    var dot = document.createElement('span');
+    dot.className = 'fx-msg-dot';
+    el.appendChild(dot);
+    var label = document.createElement('span');
+    label.className = 'fx-msg-text';
+    label.textContent = opts.text || '';
+    el.appendChild(label);
+    var dismissed = false;
+    function dismiss() {
+      if (dismissed) { return; }
+      dismissed = true;
+      _flipDismiss(stack, el, 'message-flip', function () {
+        if (opts.onRemove) { opts.onRemove(); }
+      });
+    }
+    if (opts.closable) {
+      var closeBtn = document.createElement('button');
+      closeBtn.className = 'fx-msg-close';
+      closeBtn.type = 'button';
+      closeBtn.textContent = '\u00d7';
+      closeBtn.onclick = dismiss;
+      el.appendChild(closeBtn);
+    }
+    stack.appendChild(el);
+    overlayEnter(el, 'message-flip');
+    if (duration > 0) { setTimeout(dismiss, duration); }
+    return el;
+  }
+
+  /* FxAnim.notification({ side, title, text, duration, closable, onRemove }) */
+  function notification(opts) {
+    opts = opts || {};
+    var side = opts.side || 'right';
+    var duration = opts.duration == null ? 5000 : opts.duration;
+    var stack = _ensureNotifStack(side);
+    var el = document.createElement('div');
+    el.className = 'fx-notif';
+    if (opts.title) {
+      var t = document.createElement('div');
+      t.className = 'fx-notif-title';
+      t.textContent = opts.title;
+      el.appendChild(t);
+    }
+    if (opts.text) {
+      var d = document.createElement('div');
+      d.className = 'fx-notif-text';
+      d.textContent = opts.text;
+      el.appendChild(d);
+    }
+    var dismissed = false;
+    function dismiss() {
+      if (dismissed) { return; }
+      dismissed = true;
+      _flipDismiss(stack, el, 'notif-flip-' + side, function () {
+        if (opts.onRemove) { opts.onRemove(); }
+      });
+    }
+    if (opts.closable) {
+      var cb = document.createElement('button');
+      cb.className = 'fx-msg-close';
+      cb.type = 'button';
+      cb.textContent = '\u00d7';
+      cb.onclick = dismiss;
+      el.appendChild(cb);
+    }
+    if (side === 'bottom') {
+      stack.insertBefore(el, stack.firstChild || null);
+    } else {
+      stack.appendChild(el);
+    }
+    overlayEnter(el, 'notif-flip-' + side);
+    if (duration > 0) { setTimeout(dismiss, duration); }
+    return el;
+  }
+
+  function closeAllMessages() {
+    var stack = _msgStack;
+    if (!stack) { return 0; }
+    var kids = stack.children;
+    var n = kids.length;
+    for (var i = n - 1; i >= 0; i--) {
+      _flipDismiss(stack, kids[i], 'message-flip');
+    }
+    return n;
+  }
+  function closeAllNotifs() {
+    var sides = ['right', 'left', 'top', 'bottom'];
+    var n = 0;
+    for (var s = 0; s < sides.length; s++) {
+      var st = _notifStacks[sides[s]];
+      if (!st) { continue; }
+      var kids = st.children;
+      n += kids.length;
+      for (var i = kids.length - 1; i >= 0; i--) {
+        _flipDismiss(st, kids[i], 'notif-flip-' + sides[s]);
+      }
+    }
+    return n;
+  }
+
   return {
     expand: expand,
     collapse: collapse,
@@ -343,6 +593,12 @@
     translateX: translateX,
     reveal: reveal,
     reduced: reduced,
-    hasAnimate: hasAnimate
+    hasAnimate: hasAnimate,
+    overlayEnter: overlayEnter,
+    overlayLeave: overlayLeave,
+    message: message,
+    notification: notification,
+    closeAllMessages: closeAllMessages,
+    closeAllNotifs: closeAllNotifs
   };
 });

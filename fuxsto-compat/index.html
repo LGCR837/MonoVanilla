@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title>Fuxsto 兼容动画包 · 演示 (Chrome 38+)</title>
-<link rel="stylesheet" href="fuxsto-animations.css?v=3">
+<link rel="stylesheet" href="fuxsto-animations.css?v=4">
 <style>
   /* 演示页布局: 仅用 flexbox + margin, 不使用 grid / flex-gap, 兼容 Chrome 38 */
 
@@ -204,6 +204,60 @@
     background: #fff; background: var(--fx-card);
   }
 
+  /* 第 10-11 节演示样式: 浮层 / 通知 / 菜单 / 告警 */
+  .fx-mask {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, .4); z-index: 90;
+  }
+  .fx-dialog-wrap {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 91;
+    display: -webkit-box; display: -webkit-flex; display: flex;
+    -webkit-box-align: center; -webkit-align-items: center; align-items: center;
+    -webkit-box-pack: center; -webkit-justify-content: center; justify-content: center;
+    pointer-events: none;
+  }
+  .fx-dialog {
+    pointer-events: auto;
+    width: 320px; padding: 18px; border-radius: 12px;
+    border: 1px solid #e4e4e7; border-color: var(--fx-card-bd);
+    background: #fff; background: var(--fx-card);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .3);
+  }
+  .fx-dialog-title { font-size: 15px; font-weight: 600; margin: 0 0 6px; color: #18181b; color: var(--fx-fg); }
+  .fx-dialog-desc { font-size: 13px; color: #71717a; color: var(--fx-muted); margin: 0; }
+  .fx-drawer {
+    position: fixed; top: 0; right: 0; bottom: 0; z-index: 91;
+    width: 300px; padding: 18px; overflow: auto;
+    border-left: 1px solid #e4e4e7; border-left-color: var(--fx-card-bd);
+    background: #fff; background: var(--fx-card);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .35);
+  }
+  .fx-menu {
+    position: absolute; top: 100%; left: 0; margin-top: 4px; z-index: 80;
+    min-width: 140px; padding: 4px 0; border-radius: 8px;
+    background: #fff; background: var(--fx-card);
+    border: 1px solid #e4e4e7; border-color: var(--fx-card-bd);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .12);
+  }
+  .fx-menu-item { padding: 8px 14px; font-size: 13px; color: #18181b; color: var(--fx-fg); cursor: pointer; }
+  .fx-menu-item + .fx-menu-item { border-top: 1px solid #e4e4e7; border-top-color: var(--fx-card-bd); }
+  .fx-menu-danger { color: #ef4444; }
+  @media (hover: hover) {
+    .fx-menu-item:hover { background: #fafafa; background: var(--fx-soft); }
+  }
+  .fx-alert {
+    display: -webkit-box; display: -webkit-flex; display: flex;
+    padding: 12px; margin-top: 14px; border-radius: 8px;
+    border: 1px solid #fcd34d;
+    background: #fefce8;
+  }
+  .fx-alert-icon {
+    display: inline-block; width: 34px; height: 34px; min-width: 34px;
+    border-radius: 50%; background: #f59e0b; color: #fff;
+    font-weight: 700; font-size: 16px; line-height: 34px; text-align: center;
+  }
+  .fx-alert-body { font-size: 13px; color: #71717a; color: var(--fx-muted); margin-top: 4px; max-height: 200px; overflow: hidden; }
+
   /* 第 7-9 节演示样式 */
   .tabs { position: relative; display: -webkit-box; display: -webkit-flex; display: flex; border-bottom: 1px solid #e4e4e7; border-bottom-color: var(--fx-card-bd); }
   .tab { background: none; border: 0; padding: 8px 14px; cursor: pointer; font-size: 13px; color: #71717a; color: var(--fx-muted); }
@@ -388,10 +442,78 @@
     </div>
   </div>
 
-  <p class="note">FxAnim.hasAnimate() = <span id="waapi">-</span> / FxAnim.reduced() = <span id="reduced">-</span></p>
-</div>
+   <!-- 10. 通知 / 提示条 -->
+   <div class="card">
+     <h2>10. 通知 / 提示条 · message-flip / notif-flip-*（命令式）</h2>
+     <div class="row">
+       <button class="btn btn-dark" id="msgSuccess">成功</button>
+       <button class="btn" id="msgError">错误</button>
+       <button class="btn" id="msgWarn">警告</button>
+       <button class="btn" id="msgInfo">信息</button>
+       <button class="btn" id="msgSticky">常驻 + 关闭钮</button>
+     </div>
+     <div class="row" style="margin-top:4px">
+       <button class="btn btn-dark" id="notifRight">右上通知</button>
+       <button class="btn" id="notifLeft">左上通知</button>
+       <button class="btn" id="notifBottom">底部通知</button>
+       <button class="btn" id="notifCloseAll">全部关闭</button>
+     </div>
+     <p class="note">原站 Message / Notification 是命令式 API（无组件, 只有函数）。这里用 FxAnim.message() / FxAnim.notification() 原生复刻：堆叠、自动消失、FLIP 位移动画, 过渡类名与原站 Vue &lt;Transition&gt; 钩子一一对应。</p>
+   </div>
 
-<script src="fuxsto-anim.js?v=3"></script>
+   <!-- 11. 浮层: 对话框 / 抽屉 / 菜单 / 告警 -->
+   <div class="card">
+     <h2>11. 浮层 · dialog-pop / drawer-right / dropdown / alert</h2>
+     <div class="row">
+       <button class="btn btn-dark" id="dlgOpen">打开对话框</button>
+       <button class="btn btn-dark" id="drwOpen">打开抽屉（右）</button>
+     </div>
+     <div class="row" style="margin-top:4px; display:block">
+       <span style="position:relative; display:inline-block">
+         <button class="btn" id="menuToggle">菜单下拉</button>
+         <div class="fx-menu" id="menuPanel" hidden>
+           <div class="fx-menu-item">重命名</div>
+           <div class="fx-menu-item">复制</div>
+           <div class="fx-menu-item fx-menu-danger">移到回收站</div>
+         </div>
+       </span>
+     </div>
+     <div class="fx-alert" style="display:block">
+       <span class="fx-alert-icon" id="alertIcon">!</span>
+       <div style="-webkit-box-flex:1; -webkit-flex:1; flex:1; margin-left:10px">
+         <div style="font-size:13px; font-weight:600; color:#18181b; color:var(--fx-fg)">支付失败</div>
+         <div class="fx-alert-body" id="alertBody" style="display:none">卡号被发卡行拒绝，请检查后重试。</div>
+       </div>
+     </div>
+     <div class="row" style="margin-top:10px">
+       <button class="btn" id="alertToggle">展开 / 收起告警（图标弹出 + 内容展开）</button>
+     </div>
+     <p class="note">对话框 = dialog-pop（面板 16px 模糊 + 0.92 缩放）+ dialog-mask（遮罩淡入）；抽屉 = drawer-right（整侧滑入）；菜单 = dropdown（左上角原点缩放 + 模糊）。点击遮罩外或菜单外部会关闭菜单。</p>
+   </div>
+
+   <p class="note">FxAnim.hasAnimate() = <span id="waapi">-</span> / FxAnim.reduced() = <span id="reduced">-</span></p>
+ </div>
+
+ <div class="fx-mask" id="dlgMask" hidden></div>
+ <div class="fx-dialog-wrap" id="dlgWrap" hidden>
+   <div class="fx-dialog" id="dlgPanel">
+     <div class="fx-dialog-title">放弃这次编辑？</div>
+     <div class="fx-dialog-desc">未保存的改动会丢失。</div>
+     <div class="row" style="margin-top:14px">
+       <button class="btn" id="dlgCancel">取消</button>
+       <button class="btn btn-dark" id="dlgOk">确认</button>
+     </div>
+   </div>
+ </div>
+ <div class="fx-mask" id="drwMask" hidden></div>
+ <div class="fx-drawer" id="drwPanel" hidden>
+   <div class="fx-dialog-title">筛选条件</div>
+   <div class="fx-dialog-desc" style="margin-bottom:14px">设置好之后点确认</div>
+   <button class="btn btn-dark" id="drwClose">关闭抽屉</button>
+ </div>
+
+
+<script src="fuxsto-anim.js?v=4"></script>
 <script>
 (function () {
   'use strict';
@@ -628,6 +750,84 @@
     if (box && $('revealBtn')) {
       var ropen = false;
       $('revealBtn').onclick = function () { ropen = !ropen; FxAnim.reveal(box, ropen); };
+    }
+  })();
+
+  /* 10. Message / Notification (命令式) */
+  (function () {
+    if ($('msgSuccess')) { $('msgSuccess').onclick = function () { FxAnim.message({ type: 'success', text: '订单已提交' }); }; }
+    if ($('msgError')) { $('msgError').onclick = function () { FxAnim.message({ type: 'error', text: '库存不足，无法下单' }); }; }
+    if ($('msgWarn')) { $('msgWarn').onclick = function () { FxAnim.message({ type: 'warning', text: '该地址不支持货到付款' }); }; }
+    if ($('msgInfo')) { $('msgInfo').onclick = function () { FxAnim.message({ type: 'info', text: '正在为你重新计算运费' }); }; }
+    if ($('msgSticky')) { $('msgSticky').onclick = function () { FxAnim.message({ type: 'info', text: '这条要手动关', duration: 0, closable: true }); }; }
+    if ($('notifRight')) { $('notifRight').onclick = function () { FxAnim.notification({ side: 'right', title: '部署完成', text: 'v0.1.1 已发布到生产环境。', closable: true }); }; }
+    if ($('notifLeft')) { $('notifLeft').onclick = function () { FxAnim.notification({ side: 'left', title: '换个位置', text: 'placement: top-left' }); }; }
+    if ($('notifBottom')) { $('notifBottom').onclick = function () { FxAnim.notification({ side: 'bottom', title: '证书即将过期', text: '还有 7 天。', duration: 0, closable: true }); }; }
+    if ($('notifCloseAll')) { $('notifCloseAll').onclick = function () { FxAnim.closeAllMessages(); FxAnim.closeAllNotifs(); }; }
+  })();
+
+  /* 11. 浮层: 对话框 / 抽屉 / 菜单 / 告警 */
+  (function () {
+    function showOverlay(maskId, elId, panelName, wrapId) {
+      var mask = $(maskId), el = $(elId);
+      if (!mask || !el) { return; }
+      mask.hidden = false;
+      if (wrapId) { $(wrapId).hidden = false; }
+      FxAnim.overlayEnter(mask, 'dialog-mask');
+      FxAnim.overlayEnter(el, panelName);
+    }
+    function hideOverlay(maskId, elId, panelName, wrapId) {
+      var mask = $(maskId), el = $(elId);
+      if (!mask || !el) { return; }
+      FxAnim.overlayLeave(el, panelName, function () {
+        if (wrapId) { $(wrapId).hidden = true; }
+      });
+      FxAnim.overlayLeave(mask, 'dialog-mask', function () { mask.hidden = true; });
+    }
+    if ($('dlgOpen')) { $('dlgOpen').onclick = function () { showOverlay('dlgMask', 'dlgPanel', 'dialog-pop', 'dlgWrap'); }; }
+    if ($('dlgCancel')) { $('dlgCancel').onclick = function () { hideOverlay('dlgMask', 'dlgPanel', 'dialog-pop', 'dlgWrap'); }; }
+    if ($('dlgOk')) {
+      $('dlgOk').onclick = function () {
+        hideOverlay('dlgMask', 'dlgPanel', 'dialog-pop', 'dlgWrap');
+        FxAnim.message({ type: 'success', text: '已确认放弃编辑' });
+      };
+    }
+    if ($('drwOpen')) { $('drwOpen').onclick = function () { showOverlay('drwMask', 'drwPanel', 'drawer-right'); }; }
+    if ($('drwClose')) { $('drwClose').onclick = function () { hideOverlay('drwMask', 'drwPanel', 'drawer-right'); }; }
+    if ($('dlgMask')) { $('dlgMask').onclick = function () { hideOverlay('dlgMask', 'dlgPanel', 'dialog-pop', 'dlgWrap'); }; }
+    if ($('drwMask')) { $('drwMask').onclick = function () { hideOverlay('drwMask', 'drwPanel', 'drawer-right'); }; }
+
+    var menu = $('menuPanel');
+    if ($('menuToggle') && menu) {
+      function closeMenu() {
+        if (!menu.hidden) { FxAnim.overlayLeave(menu, 'dropdown', function () { menu.hidden = true; }); }
+      }
+      $('menuToggle').onclick = function (e) {
+        e.stopPropagation();
+        if (menu.hidden) {
+          menu.hidden = false;
+          FxAnim.overlayEnter(menu, 'dropdown');
+        } else {
+          closeMenu();
+        }
+      };
+      menu.onclick = function (e) { e.stopPropagation(); };
+      document.onclick = closeMenu;
+    }
+
+    var alertBody = $('alertBody'), alertIcon = $('alertIcon');
+    var alertOpen = false;
+    if ($('alertToggle') && alertBody) {
+      $('alertToggle').onclick = function () {
+        alertOpen = !alertOpen;
+        if (alertOpen) {
+          alertBody.style.display = 'block';
+          FxAnim.overlayEnter(alertBody, 'alert-expand');
+          FxAnim.overlayEnter(alertIcon, 'alert-icon-pop');
+        } else {
+          FxAnim.overlayLeave(alertBody, 'alert-expand', function () { alertBody.style.display = 'none'; });
+        }
+      };
     }
   })();
 })();

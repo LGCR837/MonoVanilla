@@ -452,3 +452,246 @@
             transition: color var(--duration-slower, .4s) ease, -webkit-text-fill-color var(--duration-slower, .4s) ease;
   }
 }
+
+/* ============================================================
+ * 6. 浮层 / 通知过渡 (对应原站 Vue <Transition> 钩子类名)
+ *    原站 Message / Notification / Dialog / Drawer / Dropdown / Alert
+ *    用 Vue Transition 驱动 CSS 过渡, 类名形如 xxx-enter-from /
+ *    xxx-enter-active / xxx-leave-to / xxx-leave-active / xxx-move。
+ *    这里按原站数值 1:1 复刻, 并加 -webkit- 前缀 (Chrome 38 的
+ *    filter / transform 需前缀)。配合 fuxsto-anim.js 的
+ *    FxAnim.overlayEnter / overlayLeave / message / notification 使用。
+ *    时长 .4s = 原站 --duration-slower, 缓动 = 原站 --ease-swift。
+ * ============================================================ */
+
+/* ---- Message: 顶部居中堆叠, 入场带 15px 模糊 + 缩小, 退场缩至 0 ---- */
+.message-flip-move,
+.message-flip-enter-active,
+.message-flip-leave-active {
+  -webkit-transition: all .4s cubic-bezier(.16, 1, .3, 1);
+          transition: all .4s cubic-bezier(.16, 1, .3, 1);
+}
+.message-flip-enter-from {
+  opacity: 0;
+  -webkit-filter: blur(15px); filter: blur(15px);
+  -webkit-transform: translateY(-20px) scale(.5);
+          transform: translateY(-20px) scale(.5);
+}
+.message-flip-leave-to {
+  opacity: 0;
+  -webkit-filter: blur(10px); filter: blur(10px);
+  -webkit-transform: translateY(-15px) scale(0);
+          transform: translateY(-15px) scale(0);
+}
+.message-flip-leave-active { position: absolute; }
+
+/* ---- Notification: 四个方位 (right / left / top / bottom) ---- */
+.notif-flip-right-move, .notif-flip-right-enter-active, .notif-flip-right-leave-active,
+.notif-flip-left-move,  .notif-flip-left-enter-active,  .notif-flip-left-leave-active,
+.notif-flip-top-move,   .notif-flip-top-enter-active,   .notif-flip-top-leave-active,
+.notif-flip-bottom-move, .notif-flip-bottom-enter-active, .notif-flip-bottom-leave-active {
+  -webkit-transition: all .4s cubic-bezier(.16, 1, .3, 1);
+          transition: all .4s cubic-bezier(.16, 1, .3, 1);
+}
+.notif-flip-right-enter-from {
+  opacity: 0;
+  -webkit-filter: blur(8px); filter: blur(8px);
+  -webkit-transform: translate(40px) scale(.95);
+          transform: translate(40px) scale(.95);
+}
+.notif-flip-right-leave-to {
+  opacity: 0;
+  -webkit-filter: blur(4px); filter: blur(4px);
+  -webkit-transform: translate(20px) scale(.95);
+          transform: translate(20px) scale(.95);
+}
+.notif-flip-left-enter-from {
+  opacity: 0;
+  -webkit-filter: blur(8px); filter: blur(8px);
+  -webkit-transform: translate(-40px) scale(.95);
+          transform: translate(-40px) scale(.95);
+}
+.notif-flip-left-leave-to {
+  opacity: 0;
+  -webkit-filter: blur(4px); filter: blur(4px);
+  -webkit-transform: translate(-20px) scale(.95);
+          transform: translate(-20px) scale(.95);
+}
+.notif-flip-top-enter-from {
+  opacity: 0;
+  -webkit-filter: blur(8px); filter: blur(8px);
+  -webkit-transform: translateY(-40px) scale(.95);
+          transform: translateY(-40px) scale(.95);
+}
+.notif-flip-top-leave-to {
+  opacity: 0;
+  -webkit-filter: blur(4px); filter: blur(4px);
+  -webkit-transform: translateY(-20px) scale(.95);
+          transform: translateY(-20px) scale(.95);
+}
+.notif-flip-bottom-enter-from {
+  opacity: 0;
+  -webkit-filter: blur(8px); filter: blur(8px);
+  -webkit-transform: translateY(40px) scale(.95);
+          transform: translateY(40px) scale(.95);
+}
+.notif-flip-bottom-leave-to {
+  opacity: 0;
+  -webkit-filter: blur(4px); filter: blur(4px);
+  -webkit-transform: translateY(20px) scale(.95);
+          transform: translateY(20px) scale(.95);
+}
+.notif-flip-right-leave-active,
+.notif-flip-left-leave-active,
+.notif-flip-top-leave-active,
+.notif-flip-bottom-leave-active { position: absolute; }
+
+/* ---- Dialog: 面板淡入 + 16px 模糊 + 0.92 缩放, 遮罩淡入淡出 ---- */
+.dialog-mask-enter-active,
+.dialog-mask-leave-active,
+.drawer-mask-enter-active,
+.drawer-mask-leave-active {
+  -webkit-transition: opacity .4s cubic-bezier(.16, 1, .3, 1);
+          transition: opacity .4s cubic-bezier(.16, 1, .3, 1);
+}
+.dialog-mask-enter-from,
+.dialog-mask-leave-to,
+.drawer-mask-enter-from,
+.drawer-mask-leave-to { opacity: 0; }
+.dialog-pop-enter-active,
+.dialog-pop-leave-active {
+  -webkit-transition: opacity .4s cubic-bezier(.16, 1, .3, 1), -webkit-transform .4s cubic-bezier(.16, 1, .3, 1), -webkit-filter .4s cubic-bezier(.16, 1, .3, 1);
+          transition: opacity .4s cubic-bezier(.16, 1, .3, 1), transform .4s cubic-bezier(.16, 1, .3, 1), filter .4s cubic-bezier(.16, 1, .3, 1);
+}
+.dialog-pop-enter-from,
+.dialog-pop-leave-to {
+  opacity: 0;
+  -webkit-filter: blur(16px); filter: blur(16px);
+  -webkit-transform: scale(.92); transform: scale(.92);
+}
+
+/* ---- Drawer: 四方向滑出 / 滑入 ---- */
+.drawer-right-enter-active, .drawer-right-leave-active,
+.drawer-left-enter-active,  .drawer-left-leave-active,
+.drawer-top-enter-active,   .drawer-top-leave-active,
+.drawer-bottom-enter-active, .drawer-bottom-leave-active {
+  -webkit-transition: all .4s cubic-bezier(.16, 1, .3, 1);
+          transition: all .4s cubic-bezier(.16, 1, .3, 1);
+}
+.drawer-right-enter-from,
+.drawer-right-leave-to {
+  -webkit-transform: translate(100%); transform: translate(100%);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0);
+}
+.drawer-left-enter-from,
+.drawer-left-leave-to {
+  -webkit-transform: translate(-100%); transform: translate(-100%);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0);
+}
+.drawer-top-enter-from,
+.drawer-top-leave-to {
+  -webkit-transform: translateY(-100%); transform: translateY(-100%);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0);
+}
+.drawer-bottom-enter-from,
+.drawer-bottom-leave-to {
+  -webkit-transform: translateY(100%); transform: translateY(100%);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0);
+}
+
+/* ---- Dropdown (select / auto-complete / 右键菜单 / 确认气泡的面板) ---- */
+.dropdown-enter-active,
+.dropdown-leave-active {
+  -webkit-transition: opacity .4s cubic-bezier(.16, 1, .3, 1), -webkit-transform .4s cubic-bezier(.16, 1, .3, 1), -webkit-filter .4s cubic-bezier(.16, 1, .3, 1);
+          transition: opacity .4s cubic-bezier(.16, 1, .3, 1), transform .4s cubic-bezier(.16, 1, .3, 1), filter .4s cubic-bezier(.16, 1, .3, 1);
+  -webkit-transform-origin: 0 0; transform-origin: 0 0;
+}
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
+  -webkit-filter: blur(16px); filter: blur(16px);
+  -webkit-transform: scale(0); transform: scale(0);
+}
+
+/* ---- Alert: 展开内容 + 图标弹出 (spring) ---- */
+.alert-expand-enter-active,
+.alert-expand-leave-active {
+  -webkit-transition: all .4s cubic-bezier(.16, 1, .3, 1);
+          transition: all .4s cubic-bezier(.16, 1, .3, 1);
+  overflow: hidden;
+}
+.alert-expand-enter-from,
+.alert-expand-leave-to {
+  opacity: 0;
+  max-height: 0;
+  -webkit-transform: translateY(-4px); transform: translateY(-4px);
+}
+.alert-icon-pop-enter-active,
+.alert-icon-pop-leave-active {
+  -webkit-transition: all .3s cubic-bezier(.34, 1.56, .64, 1);
+          transition: all .3s cubic-bezier(.34, 1.56, .64, 1);
+}
+.alert-icon-pop-enter-from,
+.alert-icon-pop-leave-to {
+  opacity: 0;
+  -webkit-transform: scale(.4); transform: scale(.4);
+}
+
+/* ---- BackTop 淡入淡出 + 模糊 (与 FxAnim.fadeBlur 等价, 类名对齐原站) ---- */
+.backtop-fade-enter-active,
+.backtop-fade-leave-active {
+  -webkit-transition: opacity .4s cubic-bezier(.16, 1, .3, 1), -webkit-filter .4s cubic-bezier(.16, 1, .3, 1);
+          transition: opacity .4s cubic-bezier(.16, 1, .3, 1), filter .4s cubic-bezier(.16, 1, .3, 1);
+}
+.backtop-fade-enter-from,
+.backtop-fade-leave-to {
+  opacity: 0;
+  -webkit-filter: blur(12px); filter: blur(12px);
+}
+
+/* ============================================================
+ * 7. Message / Notification 卡片样式 (imperative API 配套)
+ *    颜色用「字面量 + var() 兜底」双声明: 接了主题令牌的项目
+ *    自动换肤, 没接的项目退回浅色字面量, Chrome 38 只用字面量。
+ * ============================================================ */
+.fx-message-stack {
+  position: fixed; top: 16px; left: 50%; z-index: 1000;
+  -webkit-transform: translateX(-50%); transform: translateX(-50%);
+  width: 340px; pointer-events: none;
+}
+.fx-message {
+  pointer-events: auto;
+  display: -webkit-box; display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  padding: 10px 14px; margin: 0 0 8px; border-radius: 8px; font-size: 13px;
+  background: #fff; background: var(--fx-card, #fff);
+  color: #18181b; color: var(--fx-fg, #18181b);
+  border: 1px solid #e4e4e7; border-color: var(--fx-card-bd, #e4e4e7);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .08);
+}
+.fx-msg-dot { width: 8px; height: 8px; min-width: 8px; border-radius: 50%; margin: 0 8px 0 0; background: #3b82f6; }
+.fx-message[data-type="success"] .fx-msg-dot { background: #10b981; }
+.fx-message[data-type="error"]   .fx-msg-dot { background: #ef4444; }
+.fx-message[data-type="warning"] .fx-msg-dot { background: #f59e0b; }
+.fx-message[data-type="info"]    .fx-msg-dot { background: #3b82f6; }
+.fx-msg-text { -webkit-box-flex: 1; -webkit-flex: 1; flex: 1; margin: 0 8px 0 0; }
+.fx-msg-close {
+  border: 0; background: transparent; cursor: pointer; padding: 2px;
+  font-size: 14px; line-height: 1; color: #a1a1aa; color: var(--fx-faint, #a1a1aa);
+}
+
+.fx-notif-stack { position: fixed; z-index: 1000; width: 340px; pointer-events: none; }
+.fx-notif-stack[data-side="right"]  { top: 16px; right: 16px; }
+.fx-notif-stack[data-side="left"]   { top: 16px; left: 16px; }
+.fx-notif-stack[data-side="top"]    { top: 16px; left: 50%; -webkit-transform: translateX(-50%); transform: translateX(-50%); }
+.fx-notif-stack[data-side="bottom"] { bottom: 16px; left: 50%; -webkit-transform: translateX(-50%); transform: translateX(-50%); }
+.fx-notif {
+  pointer-events: auto;
+  padding: 12px 14px; margin: 0 0 8px; border-radius: 10px; font-size: 13px;
+  background: #fff; background: var(--fx-card, #fff);
+  color: #18181b; color: var(--fx-fg, #18181b);
+  border: 1px solid #e4e4e7; border-color: var(--fx-card-bd, #e4e4e7);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .12);
+}
+.fx-notif-title { font-weight: 600; margin: 0 0 2px; }
+.fx-notif-text { font-size: 12px; color: #71717a; color: var(--fx-muted, #71717a); }
