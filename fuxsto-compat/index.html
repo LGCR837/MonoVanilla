@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>Fuxsto 兼容动画包 · 演示 (Chrome 38+)</title>
+<link rel="stylesheet" href="fuxsto-animations.css?v=3">
+<style>
+  /* 演示页布局: 仅用 flexbox + margin, 不使用 grid / flex-gap, 兼容 Chrome 38 */
+
+  /* ---- 设计令牌: 亮色 (默认) ----
+     每条颜色规则先写字面量再写 var(); Chrome 38 不支持 var(), 自动退回字面量 */
+  :root {
+    color-scheme: light;
+    --fx-bg: #f4f4f5;          /* 页面底色 */
+    --fx-fg: #18181b;          /* 主文字 */
+    --fx-card: #ffffff;        /* 卡片面 */
+    --fx-card-bd: #e4e4e7;     /* 卡片描边 / 分隔线 */
+    --fx-soft: #fafafa;        /* 卡片内的次级面 */
+    --fx-border: #d4d4d8;      /* 控件描边 */
+    --fx-muted: #71717a;       /* 次级文字 */
+    --fx-faint: #a1a1aa;       /* 三级文字 */
+    --fx-heading: #3f3f46;     /* 小标题 */
+    --fx-primary: #18181b;     /* 主色面 (深色按钮 / 指示条) */
+    --fx-primary-fg: #ffffff;  /* 主色面上的文字 */
+    --fx-primary-hover: #27272a;
+    --fx-control: #ffffff;     /* 普通按钮面 */
+    --fx-control-hover: #f4f4f5;
+    --fx-track: #e4e4e7;       /* 进度条 / 代码底色 */
+    --fx-skeleton: #f4f4f5;    /* 骨架屏 */
+    --fx-drop-bd: #a1a1aa;     /* 拖拽区虚线 */
+    --fx-stripe: rgba(0, 0, 0, .06);
+    --fx-shadow: rgba(0, 0, 0, .04);
+    --fx-ring: #18181b;         /* 呼吸 / 焦点环 (供动画包 uploadBreath 使用) */
+  }
+  /* ---- 设计令牌: 深色 (手动强制 data-theme="dark") ---- */
+  [data-theme="dark"] {
+    color-scheme: dark;
+    --fx-bg: #000000;
+    --fx-fg: #fafafa;
+    --fx-card: #09090b;
+    --fx-card-bd: #27272a;
+    --fx-soft: #18181b;
+    --fx-border: #27272a;
+    --fx-muted: #a1a1aa;
+    --fx-faint: #71717a;
+    --fx-heading: #d4d4d8;
+    --fx-primary: #fafafa;
+    --fx-primary-fg: #09090b;
+    --fx-primary-hover: #e4e4e7;
+    --fx-control: #18181b;
+    --fx-control-hover: #27272a;
+    --fx-track: #27272a;
+    --fx-skeleton: #27272a;
+    --fx-drop-bd: #52525b;
+    --fx-stripe: rgba(255, 255, 255, .08);
+    --fx-shadow: rgba(0, 0, 0, .5);
+    --fx-ring: #fafafa;
+  }
+  /* ---- 设计令牌: 深色 (跟随系统, 未强制浅色时生效) ----
+     与上面 [data-theme="dark"] 保持一致, 修改时两处需同步 */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --fx-bg: #000000;
+      --fx-fg: #fafafa;
+      --fx-card: #09090b;
+      --fx-card-bd: #27272a;
+      --fx-soft: #18181b;
+      --fx-border: #27272a;
+      --fx-muted: #a1a1aa;
+      --fx-faint: #71717a;
+      --fx-heading: #d4d4d8;
+      --fx-primary: #fafafa;
+      --fx-primary-fg: #09090b;
+      --fx-primary-hover: #e4e4e7;
+      --fx-control: #18181b;
+      --fx-control-hover: #27272a;
+      --fx-track: #27272a;
+      --fx-skeleton: #27272a;
+      --fx-drop-bd: #52525b;
+      --fx-stripe: rgba(255, 255, 255, .08);
+      --fx-shadow: rgba(0, 0, 0, .5);
+      --fx-ring: #fafafa;
+    }
+  }
+
+  * { -webkit-box-sizing: border-box; box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px 16px 64px;
+    font: 14px/1.6 -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: #f4f4f5;
+    background: var(--fx-bg);
+    color: #18181b;
+    color: var(--fx-fg);
+    -webkit-transition: background .2s ease, color .2s ease;
+            transition: background .2s ease, color .2s ease;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 6px; }
+  h2 { font-size: 16px; margin: 0 0 12px; color: #3f3f46; color: var(--fx-heading); }
+  .lead { color: #71717a; color: var(--fx-muted); margin: 0 0 24px; }
+  .lead code { background: #e4e4e7; background: var(--fx-track); padding: 1px 5px; border-radius: 4px; }
+  .theme-bar { margin: 0 0 18px; }
+  .card {
+    background: #fff; background: var(--fx-card);
+    border: 1px solid #e4e4e7; border-color: var(--fx-card-bd); border-radius: 12px;
+    padding: 18px; margin-bottom: 18px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04); box-shadow: 0 1px 2px var(--fx-shadow);
+  }
+  .row { display: -webkit-box; display: -webkit-flex; display: flex;
+         -webkit-flex-wrap: wrap; flex-wrap: wrap; -webkit-align-items: center; align-items: center; }
+  .row > * { margin: 0 8px 8px 0; }
+  .btn {
+    display: inline-block; padding: 7px 14px; border-radius: 8px; cursor: pointer;
+    border: 1px solid #d4d4d8; border-color: var(--fx-border);
+    background: #fff; background: var(--fx-control);
+    color: #18181b; color: var(--fx-fg);
+    font-size: 13px;
+    -webkit-appearance: none; appearance: none;
+    -webkit-transition: background .15s ease, border-color .15s ease, transform .15s ease;
+            transition: background .15s ease, border-color .15s ease, transform .15s ease;
+  }
+  .btn:active { -webkit-transform: scale(.97); transform: scale(.97); }
+  .btn-dark {
+    background: #18181b; background: var(--fx-primary);
+    color: #fff; color: var(--fx-primary-fg);
+    border-color: #18181b; border-color: var(--fx-primary);
+  }
+  /* hover 只在支持真实悬停的设备生效, 避免触屏 sticky hover 把深色按钮刷成浅底浅字 */
+  @media (hover: hover) {
+    .btn:hover { background: #f4f4f5; background: var(--fx-control-hover); }
+    .btn-dark:hover {
+      background: #27272a; background: var(--fx-primary-hover);
+      color: #fff; color: var(--fx-primary-fg);
+      border-color: #27272a; border-color: var(--fx-primary-hover);
+    }
+  }
+  .list { margin: 0; padding: 0; list-style: none; }
+  .list li {
+    padding: 10px 12px; border: 1px solid #e4e4e7; border-color: var(--fx-card-bd);
+    border-radius: 8px; margin-bottom: 6px;
+    background: #fafafa; background: var(--fx-soft);
+  }
+  .node-item {
+    display: inline-block; padding: 6px 10px; border-radius: 6px; margin: 0 6px 6px 0;
+    border: 1px solid #e4e4e7; border-color: var(--fx-card-bd);
+    background: #fafafa; background: var(--fx-soft);
+  }
+  .swatch { width: 34px; height: 34px; border-radius: 8px; display: inline-block; vertical-align: middle;
+            border: 1px solid #e4e4e7; border-color: var(--fx-card-bd); }
+  .swatch.s1 { background: #ef4444; } .swatch.s2 { background: #f59e0b; }
+  .swatch.s3 { background: #10b981; } .swatch.s4 { background: #3b82f6; }
+  .swatch.s5 { background: #8b5cf6; }
+  .star { font-size: 26px; color: #d4d4d8; color: var(--fx-border); cursor: pointer; padding: 0 2px; line-height: 1; }
+  .star.on { color: #f59e0b; }
+  .tip {
+    position: relative; display: inline-block; padding: 8px 12px; border-radius: 8px;
+    background: #18181b; background: var(--fx-primary);
+    color: #fff; color: var(--fx-primary-fg); font-size: 13px;
+  }
+  .faint { color: #a1a1aa; color: var(--fx-faint); }
+  .pulse-bar { display: inline-block; width: 40px; height: 14px; border-radius: 4px;
+               background: #e4e4e7; background: var(--fx-track); }
+  .skeleton { position: relative; overflow: hidden; background: #f4f4f5; background: var(--fx-skeleton); border-radius: 6px; }
+  .skeleton .shimmer {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: -webkit-linear-gradient(left, rgba(255,255,255,0) 0%, rgba(255,255,255,.9) 50%, rgba(255,255,255,0) 100%);
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.9) 50%, rgba(255,255,255,0) 100%);
+  }
+  .bar { height: 34px; background-color: #e4e4e7; background-color: var(--fx-track); border-radius: 6px;
+         background-image: -webkit-linear-gradient(45deg, rgba(0,0,0,.06) 25%, transparent 25%, transparent 50%, rgba(0,0,0,.06) 50%, rgba(0,0,0,.06) 75%, transparent 75%, transparent);
+         background-image: linear-gradient(45deg, var(--fx-stripe) 25%, transparent 25%, transparent 50%, var(--fx-stripe) 50%, var(--fx-stripe) 75%, transparent 75%, transparent);
+         background-size: 1rem 1rem; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid #f0f0f0; border-bottom-color: var(--fx-card-bd); font-size: 13px; }
+  .spinner { display: inline-block; width: 22px; height: 22px; border-radius: 50%;
+             border: 3px solid #e4e4e7; border-color: var(--fx-track);
+             border-top-color: #18181b; border-top-color: var(--fx-primary); }
+  .dot-wrap { position: relative; display: inline-block; width: 12px; height: 12px; }
+  .dot { position: absolute; width: 12px; height: 12px; border-radius: 50%; background: #18181b; background: var(--fx-primary); }
+  .drop {
+    border: 2px dashed #a1a1aa; border-color: var(--fx-drop-bd); border-radius: 12px;
+    padding: 24px; text-align: center;
+    color: #71717a; color: var(--fx-muted);
+    background: #fafafa; background: var(--fx-soft); cursor: pointer;
+  }
+  .panel-body {
+    padding: 12px; border-radius: 8px; margin-top: 8px;
+    border: 1px solid #e4e4e7; border-color: var(--fx-card-bd);
+    background: #fafafa; background: var(--fx-soft);
+  }
+  .cal { width: 220px; border: 1px solid #e4e4e7; border-color: var(--fx-card-bd); border-radius: 10px; padding: 12px; background: #fff; background: var(--fx-card); }
+  .cal-head { display: -webkit-box; display: -webkit-flex; display: flex;
+              -webkit-justify-content: space-between; justify-content: space-between; margin-bottom: 8px; }
+  .cal-grid { display: -webkit-box; display: -webkit-flex; display: flex; -webkit-flex-wrap: wrap; flex-wrap: wrap; }
+  .cal-grid span { width: 14.28%; text-align: center; padding: 4px 0; font-size: 12px; color: #52525b; color: var(--fx-muted); }
+  .note { font-size: 12px; color: #a1a1aa; color: var(--fx-faint); margin-top: 10px; }
+  .lift-box {
+    padding: 14px 18px; border-radius: 10px;
+    border: 1px solid #e4e4e7; border-color: var(--fx-card-bd);
+    background: #fff; background: var(--fx-card);
+  }
+
+  /* 第 7-9 节演示样式 */
+  .tabs { position: relative; display: -webkit-box; display: -webkit-flex; display: flex; border-bottom: 1px solid #e4e4e7; border-bottom-color: var(--fx-card-bd); }
+  .tab { background: none; border: 0; padding: 8px 14px; cursor: pointer; font-size: 13px; color: #71717a; color: var(--fx-muted); }
+  .tab.on { color: #18181b; color: var(--fx-fg); font-weight: 600; }
+  .indicator { position: absolute; bottom: -1px; left: 0; height: 2px; width: 0; background: #18181b; background: var(--fx-primary); }
+  .car-view { overflow: hidden; max-width: 320px; }
+  .car-track { display: -webkit-box; display: -webkit-flex; display: flex; width: 300%; }
+  .car-item { width: 33.3333%; padding: 22px; text-align: center; -webkit-box-sizing: border-box; box-sizing: border-box; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- 主题测试栏: 默认跟随浏览器, 点按钮强制切换 (再点一次恢复跟随) -->
+  <div class="row theme-bar">
+    <button class="btn" id="forceLight">强制浅色</button>
+    <button class="btn" id="forceDark">强制深色</button>
+    <span class="note" id="themeState" style="margin-top:0">-</span>
+  </div>
+
+  <h1>Fuxsto 兼容动画包 · 演示</h1>
+  <p class="lead">
+    从 <code>design.fuxsto.cn</code> 抽取并向下兼容改写。目标：Chrome 38 可运行 / Chrome 49 完整。
+    可用老浏览器直接打开本页验证效果。
+  </p>
+
+  <!-- 1. 入场揭示 -->
+  <div class="card">
+    <h2>1. 入场揭示 · rowFade + 逐行错峰</h2>
+    <ul class="list fx-stagger" id="staggerList">
+      <li class="animate-row-fade">列表项 01 — rowFade</li>
+      <li class="animate-row-fade">列表项 02 — rowFade</li>
+      <li class="animate-row-fade">列表项 03 — rowFade</li>
+      <li class="animate-row-fade">列表项 04 — rowFade</li>
+      <li class="animate-row-fade">列表项 05 — rowFade</li>
+    </ul>
+    <div class="row" style="margin-top:12px">
+      <button class="btn btn-dark" id="replayRows">重播入场</button>
+      <button class="btn" id="replayTree">tree-node-item</button>
+      <button class="btn" id="replayCascader">animate-cascader-col</button>
+    </div>
+    <p class="note">错峰由 .fx-stagger > :nth-child(n) 实现，Chrome 38 无需 CSS 变量即可工作。</p>
+  </div>
+
+  <!-- 2. 弹出 -->
+  <div class="card">
+    <h2>2. 弹出 · tipPop / colorPanelIn / colorSwatchPop / rateStarPop</h2>
+    <div class="row">
+      <button class="btn btn-dark" id="popTip">提示气泡 tipPop</button>
+      <button class="btn" id="popPanel">面板 colorPanelIn</button>
+      <button class="btn" id="popSwatch">色板 colorSwatchPop</button>
+    </div>
+    <div style="margin-top:12px">
+      <span class="tip" id="tipDemo" style="visibility:hidden">这是一个浮层提示</span>
+    </div>
+    <div style="margin-top:12px">
+      <span class="swatch s1 color-swatch-pop" id="sw1" style="visibility:hidden"></span>
+      <span class="swatch s2 color-swatch-pop" style="margin-left:6px"></span>
+      <span class="swatch s3 color-swatch-pop" style="margin-left:6px"></span>
+      <span class="swatch s4 color-swatch-pop" style="margin-left:6px"></span>
+      <span class="swatch s5 color-swatch-pop" style="margin-left:6px"></span>
+    </div>
+    <div class="panel-body color-panel-enter-active" id="panelDemo" style="display:none">色彩面板内容</div>
+    <div style="margin-top:14px" id="rate">
+      <span class="star" data-v="1">&#9733;</span><span class="star" data-v="2">&#9733;</span><span class="star" data-v="3">&#9733;</span><span class="star" data-v="4">&#9733;</span><span class="star" data-v="5">&#9733;</span>
+    </div>
+    <p class="note">点星星触发 rateStarPop；tipPop 使用 -webkit-filter 兜底，Chrome 38 亦可见缩放淡入。</p>
+  </div>
+
+  <!-- 3. 日历面板 -->
+  <div class="card">
+    <h2>3. 日历 · calendarPanelIn / calendarMonthInLeft / Right</h2>
+    <div class="row">
+      <button class="btn btn-dark" id="calOpen">打开日历</button>
+      <button class="btn" id="calPrev">&larr; 上月</button>
+      <button class="btn" id="calNext">下月 &rarr;</button>
+    </div>
+    <div style="margin-top:12px">
+      <div class="cal" id="calPanel" style="display:none">
+        <div class="cal-head"><span id="calTitle">2026 / 10</span></div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+    </div>
+    <p class="note">原站 rotateX 未配 perspective，为忠实还原保留纵向压平效果。</p>
+  </div>
+
+  <!-- 4. 流光 / 骨架 -->
+  <div class="card">
+    <h2>4. 流光骨架 · kineticShimmer / textShimmer / progressStripe / rowShimmer</h2>
+    <div style="max-width:320px">
+      <div class="skeleton" style="height:16px; margin-bottom:10px">
+        <div class="shimmer animate-kinetic-shimmer"></div>
+      </div>
+      <div class="skeleton" style="height:16px; width:70%; margin-bottom:16px">
+        <div class="shimmer animate-kinetic-shimmer"></div>
+      </div>
+    </div>
+    <p style="font-size:18px; font-weight:600" class="fuxsto-text-shimmer">正在生成 · Fuxsto Text Shimmer</p>
+    <div class="bar animate-progress-stripe" style="margin-top:14px"></div>
+    <table style="margin-top:16px">
+      <thead><tr><th>名称</th><th>状态</th></tr></thead>
+      <tbody>
+        <tr><td>组件 A</td><td><span class="table-row-shimmer faint">加载中…</span></td></tr>
+        <tr><td>组件 B</td><td><span class="table-row-shimmer faint">加载中…</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 5. 反馈 -->
+  <div class="card">
+    <h2>5. 反馈 · shake / spin / ping / pulse / uploadBreath</h2>
+    <div class="row">
+      <button class="btn btn-dark" id="shakeBtn">错误抖动 shake</button>
+      <span class="spinner animate-spin"></span>
+      <span class="dot-wrap"><span class="dot animate-ping"></span><span class="dot"></span></span>
+      <span class="animate-pulse pulse-bar"></span>
+    </div>
+    <div class="drop" id="drop" style="margin-top:14px">拖拽文件到此处上传（uploadBreath）</div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn" id="dropToggle">切换拖拽呼吸态</button>
+    </div>
+  </div>
+
+  <!-- 6. 折叠面板 (JS) -->
+  <div class="card">
+    <h2>6. 折叠面板 · Element.animate() 高度补间（含 ES5 回退）</h2>
+    <button class="btn btn-dark" id="togglePanel">展开 / 收起</button>
+    <div class="fx-collapsible" id="collapsible" style="height:0;overflow:hidden">
+      <div class="panel-body">
+        展开时高度 0 -&gt; 内容高，同时淡入；收起时相反。<br>
+        优先使用 Web Animations API，无 WAAPI 的老浏览器回退到 requestAnimationFrame 线性补间。<br>
+        用户开启 reduced-motion 时直接跳到终态。
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. 入场动效 (useEntryAnimate 等价) -->
+  <div class="card">
+    <h2>7. 入场动效 · opacity + translateY + scale + blur（全站默认）</h2>
+    <ul class="list" id="entryList">
+      <li>卡片项 01</li><li>卡片项 02</li><li>卡片项 03</li><li>卡片项 04</li>
+    </ul>
+    <div class="row" style="margin-top:12px">
+      <button class="btn btn-dark" id="replayEntry">重播入场（逐条错峰）</button>
+      <button class="btn" id="replayEntryLite">重播（无模糊 lite）</button>
+      <button class="btn" id="replayEntryDelay">单条延迟 200ms</button>
+    </div>
+    <p class="note">默认 700ms cubic-bezier(.16,1,.3,1)；blur(12px) 用 -webkit-filter 兜底，老浏览器忽略 blur 仍保留淡入+位移。</p>
+  </div>
+
+  <!-- 8. 交互过渡 -->
+  <div class="card">
+    <h2>8. 交互过渡 · press / lift</h2>
+    <div class="row">
+      <button class="btn btn-dark fx-press">按压缩小 fx-press</button>
+      <div class="fx-lift lift-box">悬停上浮 fx-lift</div>
+    </div>
+  </div>
+
+  <!-- 9. 指示条 / 轨道 / 揭示 -->
+  <div class="card">
+    <h2>9. 指示条 / 轨道 / 揭示 · slideTo / translateX / reveal</h2>
+    <div class="tabs" id="tabs">
+      <button class="tab on" data-i="0">标签一</button>
+      <button class="tab" data-i="1">标签二</button>
+      <button class="tab" data-i="2">标签三</button>
+      <span class="indicator fx-indicator" id="ind"></span>
+    </div>
+    <div class="car-view" style="margin-top:14px">
+      <div class="car-track fx-slide-track" id="carTrack">
+        <div class="car-item">幻灯片 1</div>
+        <div class="car-item">幻灯片 2</div>
+        <div class="car-item">幻灯片 3</div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn" id="carPrev">上一张</button>
+      <button class="btn" id="carNext">下一张</button>
+    </div>
+    <div style="margin-top:14px">
+      <button class="btn btn-dark" id="revealBtn">展开 / 收起 reveal</button>
+      <div class="fx-reveal" id="revealBox"><div class="panel-body">max-height 过渡揭示，可用于 StreamingText 展开、面板显示。</div></div>
+    </div>
+  </div>
+
+  <p class="note">FxAnim.hasAnimate() = <span id="waapi">-</span> / FxAnim.reduced() = <span id="reduced">-</span></p>
+</div>
+
+<script src="fuxsto-anim.js?v=3"></script>
+<script>
+(function () {
+  'use strict';
+
+  function $(id) { return document.getElementById(id); }
+
+  /* 主题切换: 默认跟随浏览器 (prefers-color-scheme), 按钮强制切换, 再点一次恢复跟随 */
+  (function () {
+    var root = document.documentElement;
+    var lightBtn = $('forceLight');
+    var darkBtn = $('forceDark');
+    var status = $('themeState');
+
+    function current() { return root.getAttribute('data-theme') || 'auto'; }
+
+    function mq() {
+      if (window.matchMedia) { return window.matchMedia('(prefers-color-scheme: dark)'); }
+      return null;
+    }
+
+    function render() {
+      var cur = current();
+      if (lightBtn) { lightBtn.className = cur === 'light' ? 'btn btn-dark' : 'btn'; }
+      if (darkBtn) { darkBtn.className = cur === 'dark' ? 'btn btn-dark' : 'btn'; }
+      if (status) {
+        if (cur === 'auto') {
+          var m = mq();
+          status.textContent = '跟随系统 (当前' + (m && m.matches ? '深色' : '浅色') + ')';
+        } else if (cur === 'dark') {
+          status.textContent = '强制深色';
+        } else {
+          status.textContent = '强制浅色';
+        }
+      }
+    }
+
+    function setTheme(t) {
+      if (t) { root.setAttribute('data-theme', t); }
+      else { root.removeAttribute('data-theme'); }
+      render();
+    }
+
+    if (lightBtn) { lightBtn.onclick = function () { setTheme(current() === 'light' ? null : 'light'); }; }
+    if (darkBtn) { darkBtn.onclick = function () { setTheme(current() === 'dark' ? null : 'dark'); }; }
+
+    var m = mq();
+    if (m) {
+      var onMq = function () { if (current() === 'auto') { render(); } };
+      if (m.addEventListener) { m.addEventListener('change', onMq); }
+      else if (m.addListener) { m.addListener(onMq); }
+    }
+    render();
+  })();
+
+  /* 环境信息 */
+  if ($('waapi')) { $('waapi').innerHTML = FxAnim.hasAnimate() ? 'true' : 'false'; }
+  if ($('reduced')) { $('reduced').innerHTML = FxAnim.reduced() ? 'true' : 'false'; }
+
+  /* 1. 入场揭示 */
+  function replayAll(sel, cls) {
+    var nodes = document.querySelectorAll(sel);
+    for (var i = 0; i < nodes.length; i++) { FxAnim.replay(nodes[i], cls); }
+  }
+  if ($('replayRows')) {
+    $('replayRows').onclick = function () {
+      FxAnim.stagger($('staggerList'), 40, 400);
+      replayAll('#staggerList > li', 'animate-row-fade');
+    };
+  }
+  /* 给 tree / cascader 演示项动态注入 */
+  (function () {
+    var host = document.createElement('div');
+    host.className = 'row';
+    host.style.marginTop = '10px';
+    for (var i = 0; i < 4; i++) {
+      var t = document.createElement('span');
+      t.className = 'node-item tree-node-item';
+      t.innerHTML = '节点 ' + (i + 1);
+      host.appendChild(t);
+    }
+    document.getElementById('replayTree').parentNode.appendChild(host);
+    $('replayTree').onclick = function () {
+      var n = host.children;
+      for (var i = 0; i < n.length; i++) { FxAnim.replay(n[i], 'tree-node-item'); }
+    };
+    $('replayCascader').onclick = function () {
+      var el = document.createElement('div');
+      el.className = 'node-item animate-cascader-col';
+      el.innerHTML = '级联列 ' + (host.children.length + 1);
+      host.appendChild(el);
+    };
+  })();
+
+  /* 2. 弹出 */
+  function playOnce(el, cls, baseStyle) {
+    el.style.display = baseStyle || '';
+    el.style.visibility = 'visible';
+    FxAnim.replay(el, cls);
+  }
+  if ($('popTip')) {
+    $('popTip').onclick = function () { playOnce($('tipDemo'), 'animate-tip-pop'); };
+  }
+  if ($('popPanel')) {
+    $('popPanel').onclick = function () {
+      $('panelDemo').style.display = 'block';
+      FxAnim.replay($('panelDemo'), 'color-panel-enter-active');
+    };
+  }
+  if ($('popSwatch')) {
+    $('popSwatch').onclick = function () {
+      $('sw1').style.visibility = 'visible';
+      var els = document.querySelectorAll('.color-swatch-pop');
+      for (var i = 0; i < els.length; i++) { FxAnim.replay(els[i], 'color-swatch-pop'); }
+    };
+  }
+  /* 星级 */
+  (function () {
+    var rate = $('rate');
+    if (!rate) { return; }
+    var stars = rate.getElementsByTagName('span');
+    for (var i = 0; i < stars.length; i++) {
+      (function (star, idx) {
+        star.onclick = function () {
+          for (var j = 0; j < stars.length; j++) {
+            if (j <= idx) { stars[j].className = 'star on'; } else { stars[j].className = 'star'; }
+          }
+          FxAnim.replay(star, 'rate-star-pop');
+        };
+      })(stars[i], i);
+    }
+  })();
+
+  /* 3. 日历 */
+  (function () {
+    var panel = $('calPanel');
+    if (!panel) { return; }
+    var grid = $('calGrid');
+    var title = $('calTitle');
+    var y = 2026, m = 9;
+    function render() {
+      title.innerHTML = y + ' / ' + (m + 1);
+      var html = ['日','一','二','三','四','五','六'];
+      for (var i = 0; i < 28; i++) { html.push(String(i + 1)); }
+      grid.innerHTML = '';
+      for (var k = 0; k < html.length; k++) {
+        var s = document.createElement('span');
+        s.innerHTML = html[k];
+        grid.appendChild(s);
+      }
+    }
+    render();
+    $('calOpen').onclick = function () {
+      panel.style.display = 'block';
+      FxAnim.replay(panel, 'calendar-panel-enter-active');
+    };
+    $('calPrev').onclick = function () { m--; if (m < 0) { m = 11; y--; } render(); FxAnim.replay(grid, 'calendar-view-enter-left'); };
+    $('calNext').onclick = function () { m++; if (m > 11) { m = 0; y++; } render(); FxAnim.replay(grid, 'calendar-view-enter-right'); };
+  })();
+
+  /* 5. 反馈 */
+  if ($('shakeBtn')) {
+    $('shakeBtn').onclick = function () { FxAnim.replay($('shakeBtn'), 'animate-shake'); };
+  }
+  if ($('dropToggle')) {
+    $('dropToggle').onclick = function () {
+      var d = $('drop');
+      if (d.className.indexOf('upload-drag-active') === -1) {
+        d.className += ' upload-drag-active';
+      } else {
+        d.className = d.className.replace(/\s*upload-drag-active/g, '');
+      }
+    };
+  }
+
+  /* 6. 折叠面板 */
+  (function () {
+    var el = $('collapsible');
+    if (!el) { return; }
+    var open = false;
+    $('togglePanel').onclick = function () {
+      if (open) { FxAnim.collapse(el); } else { FxAnim.expand(el); }
+      open = !open;
+    };
+  })();
+
+  /* 7. 入场动效 */
+  (function () {
+    var list = $('entryList');
+    if (!list) { return; }
+    function run(step, lite) {
+      var kids = list.children;
+      for (var i = 0; i < kids.length; i++) { FxAnim.enter(kids[i], i * step, lite); }
+    }
+    if ($('replayEntry')) { $('replayEntry').onclick = function () { run(80, false); }; }
+    if ($('replayEntryLite')) { $('replayEntryLite').onclick = function () { run(80, true); }; }
+    if ($('replayEntryDelay')) { $('replayEntryDelay').onclick = function () { FxAnim.enter(list.children[0], 200, false); }; }
+    setTimeout(function () { run(80, false); }, 100);
+  })();
+
+  /* 9. 指示条 / 轨道 / 揭示 */
+  (function () {
+    var tabs = $('tabs');
+    var ind = $('ind');
+    if (tabs && ind) {
+      var btns = tabs.getElementsByTagName('button');
+      function move(btn) {
+        FxAnim.slideTo(ind, btn.offsetLeft, btn.offsetWidth);
+      }
+      for (var i = 0; i < btns.length; i++) {
+        (function (b) {
+          b.onclick = function () {
+            for (var k = 0; k < btns.length; k++) { btns[k].className = 'tab'; }
+            b.className = 'tab on';
+            move(b);
+          };
+        })(btns[i]);
+      }
+      move(btns[0]);
+    }
+
+    var track = $('carTrack');
+    if (track) {
+      var idx = 0, total = track.children.length;
+      function go(n) {
+        idx = (n + total) % total;
+        var w = track.parentNode.clientWidth;
+        FxAnim.translateX(track, -idx * w, 500);
+      }
+      if ($('carPrev')) { $('carPrev').onclick = function () { go(idx - 1); }; }
+      if ($('carNext')) { $('carNext').onclick = function () { go(idx + 1); }; }
+    }
+
+    var box = $('revealBox');
+    if (box && $('revealBtn')) {
+      var ropen = false;
+      $('revealBtn').onclick = function () { ropen = !ropen; FxAnim.reveal(box, ropen); };
+    }
+  })();
+})();
+</script>
+</body>
+</html>
