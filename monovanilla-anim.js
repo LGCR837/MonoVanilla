@@ -434,6 +434,10 @@
     return out;
   }
 
+  function _isFlip(name) {
+    return name === 'message-flip' || name.indexOf('notif-flip-') === 0;
+  }
+
   function overlayEnter(el, name) {
     if (!el || !name) { return; }
     var st = _OVERLAY_STATE[name];
@@ -459,7 +463,7 @@
 
     _addClass(el, name + '-enter-active');
 
-    if (hasAnimate() && el.animate && st) {
+    if (hasAnimate() && el.animate && st && !_isFlip(name)) {
 
       var a = el.animate([_kf(st.from), {}], { duration: dur, easing: ease });
       el.__mvAnim = a;
@@ -521,7 +525,7 @@
       if (onDone) { onDone(); }
     }
 
-    if (hasAnimate() && el.animate && st) {
+    if (hasAnimate() && el.animate && st && !_isFlip(name)) {
       var a = el.animate([{}, _kf(st.to)], { duration: dur, easing: ease });
       el.__mvAnim = a;
       a.onfinish = function () {
@@ -620,42 +624,34 @@
       var d = el.getBoundingClientRect().top - data[i].top;
       if (d === 0) { continue; }
       _addClass(el, moveClass);
-      if (hasAnimate() && el.animate) {
-
-        var a = el.animate(
-          [{ transform: 'translateY(' + (-d) + 'px)' }, { transform: 'translateY(0px)' }],
-          { duration: 400, easing: EASE_SWIFT }
-        );
-        (function (m) {
-          a.onfinish = function () { _removeClass(m, moveClass); };
-        })(el);
-        setTimeout(function () { _removeClass(el, moveClass); }, 460);
-      } else {
-        el.style.webkitTransform = 'translateY(' + (-d) + 'px)';
-        el.style.transform = 'translateY(' + (-d) + 'px)';
-        movers.push(el);
-      }
+      el.style.transition = 'none';
+      el.style.webkitTransition = 'none';
+      el.style.webkitTransform = 'translateY(' + (-d) + 'px)';
+      el.style.transform = 'translateY(' + (-d) + 'px)';
+      movers.push(el);
     }
     if (!movers.length) { return; }
     document.body.offsetWidth;
     raf(function () {
       for (var j = 0; j < movers.length; j++) {
+        movers[j].style.transition = '';
+        movers[j].style.webkitTransition = '';
         movers[j].style.webkitTransform = '';
         movers[j].style.transform = '';
       }
       setTimeout(function () {
         for (var k = 0; k < movers.length; k++) { _removeClass(movers[k], moveClass); }
-      }, 460);
+      }, 440);
     });
   }
 
   function _flipDismiss(stack, el, name, onDone) {
-    var pre = _flipPre(stack);
     overlayLeave(el, name, function () {
+      var pre = _flipPre(stack);
       if (el.parentNode) { el.parentNode.removeChild(el); }
+      _flipPost(stack, name, pre);
       if (onDone) { onDone(); }
     });
-    _flipPost(stack, name, pre);
   }
 
   var _SVG_NS = 'http://www.w3.org/2000/svg';
