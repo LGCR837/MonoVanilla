@@ -644,12 +644,12 @@
   }
 
   function _flipDismiss(stack, el, name, onDone) {
+    var pre = _flipPre(stack);
     overlayLeave(el, name, function () {
-      var pre = _flipPre(stack);
       if (el.parentNode) { el.parentNode.removeChild(el); }
-      _flipPost(stack, name, pre);
       if (onDone) { onDone(); }
     });
+    _flipPost(stack, name, pre);
   }
 
   var _SVG_NS = 'http://www.w3.org/2000/svg';
