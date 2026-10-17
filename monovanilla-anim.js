@@ -602,14 +602,14 @@
     var out = [];
     var kids = stack.children;
     for (var i = 0; i < kids.length; i++) {
-      out.push({ el: kids[i], top: kids[i].getBoundingClientRect().top });
+      out.push({ el: kids[i], old: kids[i].getBoundingClientRect() });
     }
     return out;
   }
 
   function _flipPost(stack, name, data) {
     var moveClass = name + '-move';
-    var movers = [];
+    var moved = [];
     for (var i = 0; i < data.length; i++) {
       var el = data[i].el;
       if (!el.parentNode) { continue; }
@@ -617,28 +617,30 @@
       var cls = el.className || '';
       if (cls.indexOf(moveClass) !== -1) { continue; }
       if (cls.indexOf(name + '-enter-active') !== -1) { continue; }
-      var d = el.getBoundingClientRect().top - data[i].top;
-      if (d === 0) { continue; }
-      _addClass(el, moveClass);
+      var oldR = data[i].old;
+      var newR = el.getBoundingClientRect();
+      var dx = oldR.left - newR.left;
+      var dy = oldR.top - newR.top;
+      if (dx === 0 && dy === 0) { continue; }
       el.style.transition = 'none';
       el.style.webkitTransition = 'none';
-      el.style.webkitTransform = 'translateY(' + (-d) + 'px)';
-      el.style.transform = 'translateY(' + (-d) + 'px)';
-      movers.push(el);
+      el.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
+      el.style.webkitTransform = 'translate(' + dx + 'px, ' + dy + 'px)';
+      moved.push(el);
     }
-    if (!movers.length) { return; }
-    document.body.offsetWidth;
-    raf(function () {
-      for (var j = 0; j < movers.length; j++) {
-        movers[j].style.transition = '';
-        movers[j].style.webkitTransition = '';
-        movers[j].style.webkitTransform = '';
-        movers[j].style.transform = '';
-      }
-      setTimeout(function () {
-        for (var k = 0; k < movers.length; k++) { _removeClass(movers[k], moveClass); }
-      }, 440);
-    });
+    if (!moved.length) { return; }
+    document.body.offsetHeight;
+    for (var j = 0; j < moved.length; j++) {
+      var m = moved[j];
+      _addClass(m, moveClass);
+      m.style.transition = '';
+      m.style.webkitTransition = '';
+      m.style.transform = '';
+      m.style.webkitTransform = '';
+      (function (target) {
+        setTimeout(function () { _removeClass(target, moveClass); }, 460);
+      })(m);
+    }
   }
 
   function _flipDismiss(stack, el, name, onDone) {
