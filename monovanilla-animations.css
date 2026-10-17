@@ -1,35 +1,4 @@
-/*!
- * monovanilla-animations.css  v2.0.0
- * 原名 fuxsto-animations.css, 2026-10-17 起项目更名 MonoVanilla (类前缀 mv-, 令牌 --mv-*)。
- * ------------------------------------------------------------------
- * 从 design.fuxsto.cn 抽取并「向下兼容改写」的动画包。
- *
- * 原站技术栈:      Vue3 + Vite (ES Module) + Tailwind CSS v4.3.3
- * 原站实际最低兼容: 约 Chrome 111 / Safari 16.4 / Firefox 128 (2023+)
- *
- * 本文件目标:
- *   - 下限:   Chrome 38  (2014-10) 可运行
- *   - 理想:   Chrome 49  (2016-03) 完整
- *   - 现代浏览器自动启用 CSS 变量主题层 (第 5 节)
- *
- * 兼容处理清单:
- *   1. 关键路径不依赖 CSS 变量 (Chrome 49 才有), 全部用字面量值
- *   2. 8 位 hex 颜色 #RRGGBBAA (Chrome 62+) 全部转成 rgba()
- *   3. filter: blur() 补 -webkit- 前缀 (无前缀需 Chrome 53)
- *   4. transform 同时输出 -webkit-transform; 每段动画同时输出
- *      @-webkit-keyframes 与 @keyframes
- *   5. 不使用 Grid / flex-gap / :is() / :where() / @layer / color-mix() / oklch()
- *   6. 尊重 prefers-reduced-motion
- *
- * 用法:
- *   <link rel="stylesheet" href="monovanilla-animations.css">
- *   <script src="monovanilla-anim.js"></script>   (折叠面板等需要)
- * ------------------------------------------------------------------
- */
-
-/* ============================================================
- * 0. 无障碍: 用户要求减少动态效果时关闭动画
- * ============================================================ */
+/* monovanilla-animations.css - MonoVanilla keyframes + overlay transition classes. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     -webkit-animation-duration: .01ms !important;
@@ -41,11 +10,6 @@
   }
 }
 
-/* ============================================================
- * 1. @keyframes —— 每个动画提供 -webkit- 与标准两份
- * ============================================================ */
-
-/* ---- 基础循环 ---- */
 @-webkit-keyframes spin { to { -webkit-transform: rotate(360deg); } }
 @keyframes spin { to { -webkit-transform: rotate(360deg); transform: rotate(360deg); } }
 
@@ -55,7 +19,6 @@
 @-webkit-keyframes pulse { 50% { opacity: .5; } }
 @keyframes pulse { 50% { opacity: .5; } }
 
-/* ---- 入场揭示 (opacity + transform, 老浏览器友好) ---- */
 @-webkit-keyframes rowFade {
   0% { opacity: 0; -webkit-transform: translateY(4px); }
   to { opacity: 1; -webkit-transform: translateY(0); }
@@ -121,9 +84,6 @@
   to { -webkit-transform: scale(1); transform: scale(1); }
 }
 
-/* 注: 原站 rotateX 未配 perspective, 效果为纵向压平。
- *     如需还原立体感, 在 .calendar-panel-enter-active 上加
- *     -webkit-transform: perspective(800px); transform: perspective(800px); 并给父级 perspective。 */
 @-webkit-keyframes calendarPanelIn {
   0% { opacity: 0; -webkit-transform: rotateX(12deg) translateY(-4px) scale(.97); }
   to { opacity: 1; -webkit-transform: rotateX(0) translateY(0) scale(1); }
@@ -151,7 +111,6 @@
   to { opacity: 1; -webkit-transform: translate(0); transform: translate(0); }
 }
 
-/* ---- 流光 / 骨架 ---- */
 @-webkit-keyframes kineticShimmer {
   0% { -webkit-transform: translate(-100%); }
   45% { -webkit-transform: translate(100%); }
@@ -181,7 +140,6 @@
   to { background-position: 0 0; }
 }
 
-/* ---- 反馈 ---- */
 @-webkit-keyframes shake {
   0%, to { -webkit-transform: translate(0); }
   20%, 60% { -webkit-transform: translate(-4px); }
@@ -218,16 +176,10 @@
   }
 }
 
-/* ============================================================
- * 2. 工具类 (字面量时长/缓动, 无 CSS 变量依赖)
- * ============================================================ */
-
-/* 循环: 加载 / 提示点 */
 .animate-spin { -webkit-animation: spin 1s linear infinite; animation: spin 1s linear infinite; }
 .animate-ping { -webkit-animation: ping 1s cubic-bezier(0, 0, .2, 1) infinite; animation: ping 1s cubic-bezier(0, 0, .2, 1) infinite; }
 .animate-pulse { -webkit-animation: pulse 2s cubic-bezier(.4, 0, .6, 1) infinite; animation: pulse 2s cubic-bezier(.4, 0, .6, 1) infinite; }
 
-/* 入场揭示 */
 .animate-row-fade { -webkit-animation: rowFade .3s cubic-bezier(.16, 1, .3, 1) both; animation: rowFade .3s cubic-bezier(.16, 1, .3, 1) both; }
 .animate-cascader-col { -webkit-animation: cascaderColIn .28s cubic-bezier(.16, 1, .3, 1) both; animation: cascaderColIn .28s cubic-bezier(.16, 1, .3, 1) both; }
 .tree-node-item { -webkit-animation: treeNodeIn .28s cubic-bezier(.16, 1, .3, 1) both; animation: treeNodeIn .28s cubic-bezier(.16, 1, .3, 1) both; }
@@ -239,12 +191,10 @@
 .calendar-view-enter-right { -webkit-animation: calendarMonthInRight .32s cubic-bezier(.16, 1, .3, 1); animation: calendarMonthInRight .32s cubic-bezier(.16, 1, .3, 1); }
 .calendar-view-enter-left { -webkit-animation: calendarMonthInLeft .32s cubic-bezier(.16, 1, .3, 1); animation: calendarMonthInLeft .32s cubic-bezier(.16, 1, .3, 1); }
 
-/* 流光 / 骨架 */
 .animate-kinetic-shimmer { -webkit-animation: kineticShimmer 1.8s cubic-bezier(.85, 0, .15, 1) infinite; animation: kineticShimmer 1.8s cubic-bezier(.85, 0, .15, 1) infinite; }
 .animate-progress-stripe { -webkit-animation: progressStripe 1s linear infinite; animation: progressStripe 1s linear infinite; }
 .table-row-shimmer { -webkit-animation: mvTextShimmer 1.4s ease-in-out infinite; animation: mvTextShimmer 1.4s ease-in-out infinite; }
 
-/* 文字流光: -webkit-background-clip:text + -webkit-text-fill-color 在 Chrome 38 可用 */
 .mv-text-shimmer {
   -webkit-background-clip: text;
           background-clip: text;
@@ -259,14 +209,9 @@
           transition: color .4s ease, -webkit-text-fill-color .4s ease;
 }
 
-/* 反馈 */
 .animate-shake { -webkit-animation: shake .3s cubic-bezier(.36, .07, .19, .97) both; animation: shake .3s cubic-bezier(.36, .07, .19, .97) both; }
 .upload-drag-active { border-color: rgb(24, 24, 27); border-color: var(--mv-ring, rgb(24, 24, 27)); -webkit-animation: uploadBreath 1.4s ease-in-out infinite; animation: uploadBreath 1.4s ease-in-out infinite; }
 
-/* ============================================================
- * 3. 逐行错峰 (stagger) —— 用 nth-child, 无需 CSS 变量, Chrome 38 可用
- *    父元素加 .mv-stagger, 子元素自动递增延迟
- * ============================================================ */
 .mv-stagger > *:nth-child(1)  { -webkit-animation-delay: 0s;    animation-delay: 0s; }
 .mv-stagger > *:nth-child(2)  { -webkit-animation-delay: .03s;  animation-delay: .03s; }
 .mv-stagger > *:nth-child(3)  { -webkit-animation-delay: .06s;  animation-delay: .06s; }
@@ -284,7 +229,6 @@
 .mv-stagger > *:nth-child(15) { -webkit-animation-delay: .42s;  animation-delay: .42s; }
 .mv-stagger > *:nth-child(16) { -webkit-animation-delay: .45s;  animation-delay: .45s; }
 
-/* 手动延迟工具类 (超出 nth-child 上限或动态列表用, 也可由 JS 写内联 animation-delay) */
 .mv-delay-1 { -webkit-animation-delay: .03s; animation-delay: .03s; }
 .mv-delay-2 { -webkit-animation-delay: .06s; animation-delay: .06s; }
 .mv-delay-3 { -webkit-animation-delay: .09s; animation-delay: .09s; }
@@ -294,19 +238,9 @@
 .mv-delay-7 { -webkit-animation-delay: .21s; animation-delay: .21s; }
 .mv-delay-8 { -webkit-animation-delay: .24s; animation-delay: .24s; }
 
-/* ============================================================
- * 4. 折叠面板辅助 (配合 monovanilla-anim.js 的 expand/collapse)
- * ============================================================ */
 .mv-collapse { height: 0; overflow: hidden; }
 .mv-collapsible { overflow: hidden; }
 
-/* ============================================================
- * 4b. 入场动效 (transition-based)
- *     等价于原站 useEntryAnimate: opacity + translateY(6px)
- *     + scale(.98) + blur(12px), 700ms cubic-bezier(.16,1,.3,1)。
- *     这是组件库默认的「入场动效」(animate 属性), 覆盖全站组件。
- *     blur 补 -webkit- 前缀; 老浏览器忽略 blur 仍保留淡入+位移。
- * ============================================================ */
 .mv-enter {
   opacity: 0;
   pointer-events: none;
@@ -329,7 +263,7 @@
   -webkit-filter: blur(0);
           filter: blur(0);
 }
-/* 无模糊的轻量变体 (极老浏览器或性能敏感场景) */
+
 .mv-enter-lite {
   opacity: 0;
   pointer-events: none;
@@ -353,9 +287,6 @@
 .mv-enter-delay-5 { -webkit-transition-delay: .3s;  transition-delay: .3s; }
 .mv-enter-delay-6 { -webkit-transition-delay: .4s;  transition-delay: .4s; }
 
-/* ============================================================
- * 4c. 交互过渡 (按钮 press / 卡片 lift, 原 playground 交互反馈)
- * ============================================================ */
 .mv-press {
   -webkit-transition: -webkit-transform .15s cubic-bezier(.4, 0, .2, 1);
           transition: transform .15s cubic-bezier(.4, 0, .2, 1);
@@ -368,7 +299,7 @@
   -webkit-transition: -webkit-transform .2s cubic-bezier(.16, 1, .3, 1), box-shadow .2s ease;
           transition: transform .2s cubic-bezier(.16, 1, .3, 1), box-shadow .2s ease;
 }
-/* 悬停态仅在支持真实悬停的设备生效, 避免触屏 sticky hover */
+
 @media (hover: hover) {
   .mv-lift:hover {
     -webkit-transform: translateY(-2px);
@@ -377,23 +308,19 @@
   }
 }
 
-/* ============================================================
- * 4d. 滑块 / 指示条 / 揭示 (Carousel、Tabs 指示条、StreamingText)
- * ============================================================ */
-/* Tabs 指示条: left/width 过渡 (280ms ease-smooth) */
 .mv-indicator {
   -webkit-transition: left .28s cubic-bezier(.25, 1, .5, 1), width .28s cubic-bezier(.25, 1, .5, 1);
           transition: left .28s cubic-bezier(.25, 1, .5, 1), width .28s cubic-bezier(.25, 1, .5, 1);
 }
-/* Carousel 轨道: translateX 过渡 (500ms ease-swift) */
+
 .mv-slide-track {
   -webkit-transition: -webkit-transform .5s cubic-bezier(.16, 1, .3, 1);
           transition: transform .5s cubic-bezier(.16, 1, .3, 1);
 }
-/* Carousel 淡入淡出效果 */
+
 .mv-fade-item { opacity: 0; -webkit-transition: opacity .4s ease; transition: opacity .4s ease; }
 .mv-fade-item.mv-fade-on { opacity: 1; }
-/* 高度/透明度揭示: max-height 过渡 (StreamingText 展开、面板显示) */
+
 .mv-reveal {
   max-height: 0;
   opacity: 0;
@@ -410,11 +337,6 @@
           transform: translateY(0);
 }
 
-/* ============================================================
- * 5. 现代浏览器增强层: 允许用 CSS 变量覆盖时长/缓动
- *    Chrome 38 不支持 var(), 该 @supports 判定为 false, 整块跳过,
- *    老浏览器继续使用第 2 节的字面量值。
- * ============================================================ */
 @supports (animation-delay: var(--x, 0s)) {
   .animate-row-fade {
     -webkit-animation-duration: var(--duration-slow, .3s);
@@ -454,18 +376,6 @@
   }
 }
 
-/* ============================================================
- * 6. 浮层 / 通知过渡 (对应原站 Vue <Transition> 钩子类名)
- *    原站 Message / Notification / Dialog / Drawer / Dropdown / Alert
- *    用 Vue Transition 驱动 CSS 过渡, 类名形如 xxx-enter-from /
- *    xxx-enter-active / xxx-leave-to / xxx-leave-active / xxx-move。
- *    这里按原站数值 1:1 复刻, 并加 -webkit- 前缀 (Chrome 38 的
- *    filter / transform 需前缀)。配合 monovanilla-anim.js 的
- *    MVAnim.overlayEnter / overlayLeave / message / notification 使用。
- *    时长 .4s = 原站 --duration-slower, 缓动 = 原站 --ease-swift。
- * ============================================================ */
-
-/* ---- Message: 顶部居中堆叠, 入场带 15px 模糊 + 缩小, 退场缩至 0 ---- */
 .message-flip-move,
 .message-flip-enter-active,
 .message-flip-leave-active {
@@ -486,7 +396,6 @@
 }
 .message-flip-leave-active { position: absolute; }
 
-/* ---- Notification: 四个方位 (right / left / top / bottom) ---- */
 .notif-flip-right-move, .notif-flip-right-enter-active, .notif-flip-right-leave-active,
 .notif-flip-left-move,  .notif-flip-left-enter-active,  .notif-flip-left-leave-active,
 .notif-flip-top-move,   .notif-flip-top-enter-active,   .notif-flip-top-leave-active,
@@ -547,7 +456,6 @@
 .notif-flip-top-leave-active,
 .notif-flip-bottom-leave-active { position: absolute; }
 
-/* ---- Dialog: 面板淡入 + 16px 模糊 + 0.92 缩放, 遮罩淡入淡出 ---- */
 .dialog-mask-enter-active,
 .dialog-mask-leave-active,
 .drawer-mask-enter-active,
@@ -571,7 +479,6 @@
   -webkit-transform: scale(.92); transform: scale(.92);
 }
 
-/* ---- Drawer: 四方向滑出 / 滑入 ---- */
 .drawer-right-enter-active, .drawer-right-leave-active,
 .drawer-left-enter-active,  .drawer-left-leave-active,
 .drawer-top-enter-active,   .drawer-top-leave-active,
@@ -600,7 +507,6 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0);
 }
 
-/* ---- Dropdown (select / auto-complete / 右键菜单 / 确认气泡的面板) ---- */
 .dropdown-enter-active,
 .dropdown-leave-active {
   -webkit-transition: opacity .4s cubic-bezier(.16, 1, .3, 1), -webkit-transform .4s cubic-bezier(.16, 1, .3, 1), -webkit-filter .4s cubic-bezier(.16, 1, .3, 1);
@@ -614,7 +520,6 @@
   -webkit-transform: scale(0); transform: scale(0);
 }
 
-/* ---- Alert: 展开内容 + 图标弹出 (spring) ---- */
 .alert-expand-enter-active,
 .alert-expand-leave-active {
   -webkit-transition: all .4s cubic-bezier(.16, 1, .3, 1);
@@ -638,7 +543,6 @@
   -webkit-transform: scale(.4); transform: scale(.4);
 }
 
-/* ---- BackTop 淡入淡出 + 模糊 (与 MVAnim.fadeBlur 等价, 类名对齐原站) ---- */
 .backtop-fade-enter-active,
 .backtop-fade-leave-active {
   -webkit-transition: opacity .4s cubic-bezier(.16, 1, .3, 1), -webkit-filter .4s cubic-bezier(.16, 1, .3, 1);
@@ -650,14 +554,6 @@
   -webkit-filter: blur(12px); filter: blur(12px);
 }
 
-/* ============================================================
- * 7. Message / Notification 卡片样式 (数值对齐原站)
- *    Message:  顶部居中 24px, 12/16px 内边距, 8px 圆角,
- *              0 8px 30px rgba(0,0,0,.08), 16px 图标, 14px/600/1 行高;
- *    Notif:    360px 宽, 14px 内边距, 18px 图标,
- *              13px/700 标题 + 12px/1.625 正文, 双层阴影。
- *    颜色走 --mv-* 令牌 + 字面量兜底; 老浏览器用 margin 代替 flex gap。
- * ============================================================ */
 .mv-message-stack {
   position: fixed; top: 24px; left: 0; right: 0; z-index: 99999;
   display: -webkit-box; display: -webkit-flex; display: flex;

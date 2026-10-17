@@ -1,36 +1,4 @@
-/*!
- * monovanilla-anim.js  v2.0.0
- * 原名 fuxsto-anim.js / FxAnim, 2026-10-17 起项目更名 MonoVanilla, 全局 API 为 MVAnim。
- * ------------------------------------------------------------------
- * design.fuxsto.cn 动画的兼容辅助脚本, 纯 ES5 / 无构建 / 无框架。
- *
- * 原站用 Vue3 + Web Animations API 做折叠面板的高度 count-up/count-down,
- * 这里用等价的原生实现, 并向下兼容到 Chrome 38 (2014-10)。
- *
- * 提供:
- *   MVAnim.expand(el, duration, easing)    展开 (height 0 -> 内容高, 淡入)
- *   MVAnim.collapse(el, duration, easing)  收起 (height 内容高 -> 0, 淡出)
- *   MVAnim.toggle(el, duration, easing)    切换展开/收起
- *   MVAnim.stagger(container, step, capMs) 给子元素写递增 animation-delay
- *   MVAnim.replay(el, className)           重播某个 .animate-* 动画
- *   MVAnim.reduced()                       当前是否处于 reduced-motion
- *   MVAnim.overlayEnter(el, name)          浮层/通知「进入」(Vue Transition 等价)
- *   MVAnim.overlayLeave(el, name, onDone)  浮层/通知「离开」
- *   MVAnim.overlayOpen(mask, panel, wrap, name)     打开浮层 (清 hidden/display)
- *   MVAnim.overlayClose(mask, panel, wrap, name)    关闭浮层 (动画后 display:none)
- *   MVAnim.message(opts)                   命令式 Message (顶部堆叠, 自动消失)
- *   MVAnim.notification(opts)              命令式 Notification (四方位堆叠)
- *   MVAnim.closeAllMessages() / closeAllNotifs()  清空对应堆栈
- *
- * 兼容策略:
- *   - 优先使用 Element.animate() (Chrome 36+); 不可用时回退到
- *     requestAnimationFrame 的线性补间 (Chrome 10+)。
- *   - 用户开启 reduced-motion 时直接跳到终态, 不播放动画。
- *   - v2.0: 浮层 enter/leave 与 FLIP 位移改用 WAAPI 驱动 (Chrome 36+):
- *     元素刚从 display:none 恢复的同一任务内 CSS transition 不会启动,
- *     类方案会出现弹层直切; WAAPI 不受该问题影响。
- * ------------------------------------------------------------------
- */
+/*! MVAnim (monovanilla-anim.js) - ES5 animation helpers, WAAPI with rAF fallback. Chrome 38+. */
 (function (global, factory) {
   if (typeof module === 'object' && module.exports) {
     module.exports = factory();
@@ -73,7 +41,6 @@
   var EASE_SWIFT = 'cubic-bezier(.16, 1, .3, 1)';
   var EASE_SPRING = 'cubic-bezier(.34, 1.56, .64, 1)';
 
-  /* rAF 线性补间, 供无 WAAPI 的老浏览器使用 */
   function _tween(duration, onFrame, onDone) {
     var start = _now();
     var id;
@@ -198,7 +165,6 @@
     }
   }
 
-  /* ---- 入场动效 (等价 useEntryAnimate) ---- */
   function enter(el, delay, lite) {
     if (!el || !el.classList) { return; }
     delay = delay == null ? 0 : delay;
@@ -227,7 +193,6 @@
     }
   }
 
-  /* ---- 淡入 + 模糊 (原站 BackTop) ---- */
   function fadeBlur(el, show, duration, blurPx) {
     if (!el) { return null; }
     duration = duration == null ? (show ? 400 : 350) : duration;
@@ -268,7 +233,6 @@
     });
   }
 
-  /* ---- 通用数值补间 (width / height / left / x) ---- */
   function _num(el, prop, to, duration) {
     var map = { width: 'offsetWidth', height: 'offsetHeight', left: 'offsetLeft', x: null };
     var from = prop === 'x' ? 0 : (el[map[prop]] || 0);
@@ -316,7 +280,6 @@
   }
   function translateX(el, x, duration) { return _num(el, 'x', x, duration); }
 
-  /* ---- 揭示开关 (mv-reveal) ---- */
   function reveal(el, open) {
     if (!el || !el.classList) { return; }
     if (open) { el.classList.add('mv-reveal-open'); }
@@ -331,8 +294,7 @@
     } else {
       el.className = el.className.replace(new RegExp('(^|\\s)' + cls + '(\\s|$)', 'g'), ' ');
     }
-    /* 强制重排以重启 CSS 动画 */
-    /* eslint-disable no-unused-expressions */
+
     el.offsetWidth;
     if (el.classList) {
       el.classList.add(cls);
@@ -340,14 +302,6 @@
       el.className += ' ' + cls;
     }
   }
-
-  /* ============================================================
-   * 浮层 / 通知过渡 (对应原站 Vue <Transition> 钩子类名)
-   * 类名定义见 monovanilla-animations.css 第 6 节:
-   *   message-flip / notif-flip-{right,left,top,bottom}
-   *   dialog-pop / dialog-mask / drawer-{right,left,top,bottom} / drawer-mask
-   *   dropdown / alert-expand / alert-icon-pop / backtop-fade
-   * ============================================================ */
 
   function _addClass(el, c) {
     if (el.classList) { el.classList.add(c); }
@@ -365,7 +319,6 @@
     }
   }
 
-  /* 监听 transitionend, 超时时兜底 (transition 未发生 / 老浏览器) */
   function _watchTransition(el, cb, timeoutMs) {
     var done = false;
     function fin() {
@@ -381,16 +334,6 @@
     setTimeout(fin, timeoutMs || 500);
   }
 
-  /* ============================================================
-   * 浮层 start/end 状态的「内联镜像表」。
-   *
-   * 为什么不用纯类: 实测在真实 Chrome 里, 元素刚从 display:none / hidden
-   * 恢复可见、或经历过一轮完整开合周期后, *-enter-from / *-leave-to 这类
-   * 类规则不一定会重新参与样式求值 —— 起点状态根本落不到计算样式里,
-   * 过渡因此完全不发生 (弹回 / 直切)。内联样式同帧必达, 用它保证
-   * 起点/终点, 类只负责提供 transition 定义 (与 -active 规则配套) 和
-   * 与原站类名的一致性。改这里必须与 monovanilla-animations.css 第 6 节同步。
-   * ============================================================ */
   var _OVERLAY_STATE = {
     'dialog-pop': {
       from: { opacity: '0', filter: 'blur(16px)', transform: 'scale(0.92)' },
@@ -471,15 +414,15 @@
       if (k === 'filter') { el.style.webkitFilter = ''; }
     }
   }
-  /* 整树重排, 确保状态真正落入计算样式 (元素刚恢复可见时, 只重排自身不可靠) */
+
   function _reflowAll(el) {
     try {
       if (typeof document !== 'undefined' && document.body) { document.body.offsetWidth; }
-    } catch (e) { /* 非浏览器环境 */ }
+    } catch (e) {
+ }
     el.offsetWidth;
   }
 
-  /* 把状态表对象转成 WAAPI 关键帧 (camelCase 属性名, Chrome 38 可识别的项) */
   function _kf(state) {
     if (!state) { return {}; }
     var out = {};
@@ -491,21 +434,17 @@
     return out;
   }
 
-  /* 「进入」: 起点=from 状态, 终点=自然状态。
-     优先 WAAPI (Chrome 36+): 不走 transition 引擎 —— 实测元素刚从
-     display:none / hidden 恢复可见的同一任务内, CSS transition 不会
-     启动 (起点状态落不进计算样式), 表现为弹层直切。WAAPI 直接驱动
-     渲染, 不受该问题影响。WAAPI 不可用时回退 类+内联 方案。 */
   function overlayEnter(el, name) {
     if (!el || !name) { return; }
     var st = _OVERLAY_STATE[name];
     var dur = (st && st.dur) || 400;
     var ease = (st && st.ease) || EASE_SWIFT;
-    var gen = (el.__fxGen = (el.__fxGen || 0) + 1);
-    el.__fxLeaving = false;
-    if (el.__fxAnim) {
-      try { el.__fxAnim.cancel(); } catch (e2) { /* noop */ }
-      el.__fxAnim = null;
+    var gen = (el.__mvGen = (el.__mvGen || 0) + 1);
+    el.__mvLeaving = false;
+    if (el.__mvAnim) {
+      try { el.__mvAnim.cancel(); } catch (e2) {
+ }
+      el.__mvAnim = null;
     }
     _removeClass(el, name + '-leave-active');
     _removeClass(el, name + '-leave-to');
@@ -521,54 +460,49 @@
     _addClass(el, name + '-enter-active');
 
     if (hasAnimate() && el.animate && st) {
-      /* 注意: 此时不能加 -enter-from 类 —— 它会把底层样式钉在起点值,
-         空关键帧 {} 解析成"底层值"时就解析回起点值, 动画变成原地不动 */
+
       var a = el.animate([_kf(st.from), {}], { duration: dur, easing: ease });
-      el.__fxAnim = a;
+      el.__mvAnim = a;
       a.onfinish = function () {
         _removeClass(el, name + '-enter-active');
         _removeClass(el, name + '-enter-from');
-        if (el.__fxAnim === a) { el.__fxAnim = null; }
+        if (el.__mvAnim === a) { el.__mvAnim = null; }
       };
       return;
     }
 
-    /* 回退: 类 + 内联 (老浏览器 transition 引擎正常工作的场景) */
     _addClass(el, name + '-enter-from');
     _applyState(el, st ? st.from : null);
     _reflowAll(el);
     raf(function () {
-      if (el.__fxGen !== gen) { return; }
+      if (el.__mvGen !== gen) { return; }
       _clearState(el, st ? st.from : null);
       _removeClass(el, name + '-enter-from');
     });
     setTimeout(function () {
-      if (el.__fxGen !== gen) { return; }
+      if (el.__mvGen !== gen) { return; }
       _removeClass(el, name + '-enter-active');
     }, dur + 40);
   }
 
-  /* 「离开」: 起点=自然状态, 终点=to 状态。
-     播完 (dur) 后回调 onDone, 由调用方负责隐藏/移除节点
-     (WAAPI fill:none 结束会回落到自然状态, 所以必须紧接着隐藏)。
-     超时兜底防止标签页隐藏时 onfinish 不触发。 */
   function overlayLeave(el, name, onDone) {
     if (!el || !name) { if (onDone) { onDone(); } return; }
     var st = _OVERLAY_STATE[name];
     var dur = (st && st.dur) || 400;
     var ease = (st && st.ease) || EASE_SWIFT;
-    var gen = (el.__fxGen = (el.__fxGen || 0) + 1);
-    el.__fxLeaving = true;
-    if (el.__fxAnim) {
-      try { el.__fxAnim.cancel(); } catch (e2) { /* noop */ }
-      el.__fxAnim = null;
+    var gen = (el.__mvGen = (el.__mvGen || 0) + 1);
+    el.__mvLeaving = true;
+    if (el.__mvAnim) {
+      try { el.__mvAnim.cancel(); } catch (e2) {
+ }
+      el.__mvAnim = null;
     }
     _removeClass(el, name + '-enter-active');
     _removeClass(el, name + '-enter-from');
     _clearState(el, st ? st.from : null);
 
     if (reduced()) {
-      el.__fxLeaving = false;
+      el.__mvLeaving = false;
       _removeClass(el, name + '-leave-active');
       _removeClass(el, name + '-leave-to');
       _clearState(el, st ? st.to : null);
@@ -579,8 +513,8 @@
     _addClass(el, name + '-leave-active');
 
     function finish() {
-      if (!el.__fxLeaving) { return; }
-      el.__fxLeaving = false;
+      if (!el.__mvLeaving) { return; }
+      el.__mvLeaving = false;
       _removeClass(el, name + '-leave-active');
       _removeClass(el, name + '-leave-to');
       _clearState(el, st ? st.to : null);
@@ -589,36 +523,34 @@
 
     if (hasAnimate() && el.animate && st) {
       var a = el.animate([{}, _kf(st.to)], { duration: dur, easing: ease });
-      el.__fxAnim = a;
+      el.__mvAnim = a;
       a.onfinish = function () {
-        if (el.__fxAnim === a) { el.__fxAnim = null; }
+        if (el.__mvAnim === a) { el.__mvAnim = null; }
         finish();
       };
       setTimeout(function () {
-        if (el.__fxAnim === a) {
-          try { a.cancel(); } catch (e2) { /* noop */ }
-          el.__fxAnim = null;
+        if (el.__mvAnim === a) {
+          try { a.cancel(); } catch (e2) {
+ }
+          el.__mvAnim = null;
           finish();
         }
       }, dur + 60);
       return;
     }
 
-    /* 回退: 类 + 内联 (-leave-to 类同理只给回退路径用,
-       WAAPI 期间钉住终点值会让空关键帧解析失败) */
     _addClass(el, name + '-leave-to');
     _applyState(el, st ? st.to : null);
     _reflowAll(el);
     setTimeout(function () {
-      if (el.__fxGen !== gen) { return; }
+      if (el.__mvGen !== gen) { return; }
       finish();
     }, dur + 40);
   }
 
-  /* 打开浮层: 同时清掉 hidden 属性与内联 display, 不依赖 CSS 优先级 */
   function overlayOpen(mask, panel, wrap, name) {
     if (!panel || !name) { return; }
-    panel.__fxLeaving = false;
+    panel.__mvLeaving = false;
     if (wrap) { wrap.hidden = false; wrap.style.display = ''; wrap.style.pointerEvents = ''; }
     if (mask) { mask.hidden = false; mask.style.display = ''; }
     panel.hidden = false;
@@ -629,11 +561,9 @@
     overlayEnter(panel, name);
   }
 
-  /* 关闭浮层: 动画结束后用内联 display:none + hidden 双保险。
-     关闭期间禁掉 wrap 的点击, 防止重复触发。 */
   function overlayClose(mask, panel, wrap, name, onDone) {
     if (!panel || !name) { if (onDone) { onDone(); } return; }
-    if (panel.__fxLeaving) { return; }
+    if (panel.__mvLeaving) { return; }
     if (wrap) { wrap.style.pointerEvents = 'none'; }
     overlayLeave(panel, name, function () {
       panel.hidden = true;
@@ -646,7 +576,6 @@
     });
   }
 
-  /* ---- Message / Notification 命令式 API ---- */
   var _msgStack = null;
   var _notifStacks = {};
 
@@ -669,12 +598,6 @@
     return _notifStacks[side];
   }
 
-  /* ============================================================
-   * FLIP 位移: 复刻原站 Vue TransitionGroup 的 move 行为。
-   * 列表变化前记录兄弟项位置, 变化后把偏移量写成内联 transform,
-   * 加 -move 类 (其 transition 规则在动画包里), 下一帧清掉 transform
-   * 让过渡补间回位。插入与移除两处都要做, 否则堆叠时会瞬移。
-   * ============================================================ */
   function _flipPre(stack) {
     var out = [];
     var kids = stack.children;
@@ -690,7 +613,7 @@
     for (var i = 0; i < data.length; i++) {
       var el = data[i].el;
       if (!el.parentNode) { continue; }
-      if (el.__fxLeaving) { continue; }
+      if (el.__mvLeaving) { continue; }
       var cls = el.className || '';
       if (cls.indexOf(moveClass) !== -1) { continue; }
       if (cls.indexOf(name + '-enter-active') !== -1) { continue; }
@@ -698,7 +621,7 @@
       if (d === 0) { continue; }
       _addClass(el, moveClass);
       if (hasAnimate() && el.animate) {
-        /* WAAPI 直接驱动位移, 不依赖 transition 引擎 */
+
         var a = el.animate(
           [{ transform: 'translateY(' + (-d) + 'px)' }, { transform: 'translateY(0px)' }],
           { duration: 400, easing: EASE_SWIFT }
@@ -726,7 +649,6 @@
     });
   }
 
-  /* 从堆栈中移除一项: leave 过渡 + 兄弟项 FLIP 位移 */
   function _flipDismiss(stack, el, name, onDone) {
     var pre = _flipPre(stack);
     overlayLeave(el, name, function () {
@@ -736,7 +658,6 @@
     _flipPost(stack, name, pre);
   }
 
-  /* ---- 图标: 原站用 lucide, 这里内联同路径 SVG ---- */
   var _SVG_NS = 'http://www.w3.org/2000/svg';
   var _ICON_PATHS = {
     info: [
@@ -786,8 +707,6 @@
     return svg;
   }
 
-  /* MVAnim.message({ type, text, duration, closable, onRemove })
-     结构与原站一致: 图标 + 14px/600 文本 + 可选关闭钮。默认 3s。 */
   function message(opts) {
     opts = opts || {};
     var type = opts.type || 'info';
@@ -827,8 +746,6 @@
     return el;
   }
 
-  /* MVAnim.notification({ side, type, title, text, duration, closable, onRemove })
-     结构与原站一致: 18px 图标 + 13px/700 标题 + 12px 正文 + 关闭钮。默认 4s。 */
   function notification(opts) {
     opts = opts || {};
     var side = opts.side || 'right';
@@ -879,7 +796,7 @@
       row.appendChild(cb);
     }
     el.appendChild(row);
-    /* 与原站一致: 新通知 push 到列表末尾 (底部堆栈里即最靠近屏幕角), 已有项整体上移 */
+
     var preN = _flipPre(stack);
     stack.appendChild(el);
     _flipPost(stack, 'notif-flip-' + side, preN);
