@@ -630,17 +630,19 @@
     }
     if (!moved.length) { return; }
     document.body.offsetHeight;
-    for (var j = 0; j < moved.length; j++) {
-      var m = moved[j];
-      _addClass(m, moveClass);
-      m.style.transition = '';
-      m.style.webkitTransition = '';
-      m.style.transform = '';
-      m.style.webkitTransform = '';
-      (function (target) {
-        setTimeout(function () { _removeClass(target, moveClass); }, 460);
-      })(m);
-    }
+    raf(function () {
+      for (var j = 0; j < moved.length; j++) {
+        var m = moved[j];
+        _addClass(m, moveClass);
+        m.style.transition = '';
+        m.style.webkitTransition = '';
+        m.style.transform = '';
+        m.style.webkitTransform = '';
+      }
+      setTimeout(function () {
+        for (var k = 0; k < moved.length; k++) { _removeClass(moved[k], moveClass); }
+      }, 440);
+    });
   }
 
   function _flipDismiss(stack, el, name, onDone) {
