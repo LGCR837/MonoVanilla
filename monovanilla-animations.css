@@ -394,7 +394,6 @@
   -webkit-transform: translateY(-15px) scale(0);
           transform: translateY(-15px) scale(0);
 }
-.message-flip-leave-active { position: absolute; }
 
 .notif-flip-right-move, .notif-flip-right-enter-active, .notif-flip-right-leave-active,
 .notif-flip-left-move,  .notif-flip-left-enter-active,  .notif-flip-left-leave-active,
@@ -451,10 +450,6 @@
   -webkit-transform: translateY(20px) scale(.95);
           transform: translateY(20px) scale(.95);
 }
-.notif-flip-right-leave-active,
-.notif-flip-left-leave-active,
-.notif-flip-top-leave-active,
-.notif-flip-bottom-leave-active { position: absolute; }
 
 .dialog-mask-enter-active,
 .dialog-mask-leave-active,

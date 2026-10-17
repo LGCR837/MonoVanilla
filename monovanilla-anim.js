@@ -461,10 +461,8 @@
       return;
     }
 
-    _addClass(el, name + '-enter-active');
-
     if (hasAnimate() && el.animate && st && !_isFlip(name)) {
-
+      _addClass(el, name + '-enter-active');
       var a = el.animate([_kf(st.from), {}], { duration: dur, easing: ease });
       el.__mvAnim = a;
       a.onfinish = function () {
@@ -476,11 +474,10 @@
     }
 
     _addClass(el, name + '-enter-from');
-    _applyState(el, st ? st.from : null);
     _reflowAll(el);
+    _addClass(el, name + '-enter-active');
     raf(function () {
       if (el.__mvGen !== gen) { return; }
-      _clearState(el, st ? st.from : null);
       _removeClass(el, name + '-enter-from');
     });
     setTimeout(function () {
@@ -544,7 +541,6 @@
     }
 
     _addClass(el, name + '-leave-to');
-    _applyState(el, st ? st.to : null);
     _reflowAll(el);
     setTimeout(function () {
       if (el.__mvGen !== gen) { return; }
