@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>Fuxsto 兼容动画包 · 演示 (Chrome 38+)</title>
-<link rel="stylesheet" href="fuxsto-animations.css?v=4">
+<title>MonoVanilla 兼容动画包 · 演示 (Chrome 38+)</title>
+<link rel="stylesheet" href="monovanilla-animations.css">
 <style>
   /* 演示页布局: 仅用 flexbox + margin, 不使用 grid / flex-gap, 兼容 Chrome 38 */
 
@@ -13,113 +13,153 @@
      每条颜色规则先写字面量再写 var(); Chrome 38 不支持 var(), 自动退回字面量 */
   :root {
     color-scheme: light;
-    --fx-bg: #f4f4f5;          /* 页面底色 */
-    --fx-fg: #18181b;          /* 主文字 */
-    --fx-card: #ffffff;        /* 卡片面 */
-    --fx-card-bd: #e4e4e7;     /* 卡片描边 / 分隔线 */
-    --fx-soft: #fafafa;        /* 卡片内的次级面 */
-    --fx-border: #d4d4d8;      /* 控件描边 */
-    --fx-muted: #71717a;       /* 次级文字 */
-    --fx-faint: #a1a1aa;       /* 三级文字 */
-    --fx-heading: #3f3f46;     /* 小标题 */
-    --fx-primary: #18181b;     /* 主色面 (深色按钮 / 指示条) */
-    --fx-primary-fg: #ffffff;  /* 主色面上的文字 */
-    --fx-primary-hover: #27272a;
-    --fx-control: #ffffff;     /* 普通按钮面 */
-    --fx-control-hover: #f4f4f5;
-    --fx-track: #e4e4e7;       /* 进度条 / 代码底色 */
-    --fx-skeleton: #f4f4f5;    /* 骨架屏 */
-    --fx-drop-bd: #a1a1aa;     /* 拖拽区虚线 */
-    --fx-stripe: rgba(0, 0, 0, .06);
-    --fx-shadow: rgba(0, 0, 0, .04);
-    --fx-ring: #18181b;         /* 呼吸 / 焦点环 (供动画包 uploadBreath 使用) */
+    --mv-bg: #f4f4f5;          /* 页面底色 */
+    --mv-fg: #18181b;          /* 主文字 */
+    --mv-card: #ffffff;        /* 卡片面 */
+    --mv-card-bd: #e4e4e7;     /* 卡片描边 / 分隔线 */
+    --mv-soft: #fafafa;        /* 卡片内的次级面 */
+    --mv-border: #d4d4d8;      /* 控件描边 */
+    --mv-muted: #71717a;       /* 次级文字 */
+    --mv-faint: #a1a1aa;       /* 三级文字 */
+    --mv-heading: #3f3f46;     /* 小标题 */
+    --mv-primary: #18181b;     /* 主色面 (深色按钮 / 指示条) */
+    --mv-primary-fg: #ffffff;  /* 主色面上的文字 */
+    --mv-primary-hover: #27272a;
+    --mv-control: #ffffff;     /* 普通按钮面 */
+    --mv-control-hover: #f4f4f5;
+    --mv-track: #e4e4e7;       /* 进度条 / 代码底色 */
+    --mv-skeleton: #f4f4f5;    /* 骨架屏 */
+    --mv-drop-bd: #a1a1aa;     /* 拖拽区虚线 */
+    --mv-stripe: rgba(0, 0, 0, .06);
+    --mv-shadow: rgba(0, 0, 0, .04);
+    --mv-ring: #18181b;         /* 呼吸 / 焦点环 (供动画包 uploadBreath 使用) */
+    --mv-destructive: #ef4444;  /* 错误 / 危险 */
+    --mv-success: #10b981;      /* 成功 */
+    --mv-warning: #f59e0b;      /* 警告 */
+    --mv-secondary: #f4f4f5;    /* 次级按钮面 */
+    --mv-secondary-fg: #18181b;
+    --mv-msg-bg: rgba(255, 255, 255, .6);   /* message 半透明底 */
+    --mv-mask-bg: rgba(255, 255, 255, .6);  /* 对话框遮罩 */
+    --mv-radius: 8px;           /* 原站 --radius: .5rem */
+    --mv-surface: #ffffff;      /* 浮层 / 通知卡片面 */
+    --mv-muted-20: rgba(244, 244, 245, .2);  /* 对话框底栏 */
+    --mv-border-40: rgba(228, 228, 231, .4);
+    --mv-destructive-50: rgba(239, 68, 68, .5);
+    --mv-success-50: rgba(16, 185, 129, .5);
+    --mv-warning-50: rgba(245, 158, 11, .5);
   }
   /* ---- 设计令牌: 深色 (手动强制 data-theme="dark") ---- */
   [data-theme="dark"] {
     color-scheme: dark;
-    --fx-bg: #000000;
-    --fx-fg: #fafafa;
-    --fx-card: #09090b;
-    --fx-card-bd: #27272a;
-    --fx-soft: #18181b;
-    --fx-border: #27272a;
-    --fx-muted: #a1a1aa;
-    --fx-faint: #71717a;
-    --fx-heading: #d4d4d8;
-    --fx-primary: #fafafa;
-    --fx-primary-fg: #09090b;
-    --fx-primary-hover: #e4e4e7;
-    --fx-control: #18181b;
-    --fx-control-hover: #27272a;
-    --fx-track: #27272a;
-    --fx-skeleton: #27272a;
-    --fx-drop-bd: #52525b;
-    --fx-stripe: rgba(255, 255, 255, .08);
-    --fx-shadow: rgba(0, 0, 0, .5);
-    --fx-ring: #fafafa;
+    --mv-bg: #000000;
+    --mv-fg: #fafafa;
+    --mv-card: #09090b;
+    --mv-card-bd: #27272a;
+    --mv-soft: #18181b;
+    --mv-border: #27272a;
+    --mv-muted: #a1a1aa;
+    --mv-faint: #71717a;
+    --mv-heading: #d4d4d8;
+    --mv-primary: #fafafa;
+    --mv-primary-fg: #09090b;
+    --mv-primary-hover: #e4e4e7;
+    --mv-control: #18181b;
+    --mv-control-hover: #27272a;
+    --mv-track: #27272a;
+    --mv-skeleton: #27272a;
+    --mv-drop-bd: #52525b;
+    --mv-stripe: rgba(255, 255, 255, .08);
+    --mv-shadow: rgba(0, 0, 0, .5);
+    --mv-ring: #fafafa;
+    --mv-destructive: #7f1d1d;
+    --mv-success: #059669;
+    --mv-warning: #d97706;
+    --mv-secondary: #27272a;
+    --mv-secondary-fg: #fafafa;
+    --mv-msg-bg: rgba(0, 0, 0, .8);
+    --mv-mask-bg: rgba(0, 0, 0, .4);
+    --mv-surface: #000000;
+    --mv-muted-20: rgba(39, 39, 42, .2);
+    --mv-border-40: rgba(39, 39, 42, .4);
+    --mv-destructive-50: rgba(127, 29, 29, .5);
+    --mv-success-50: rgba(5, 150, 105, .5);
+    --mv-warning-50: rgba(217, 119, 6, .5);
   }
   /* ---- 设计令牌: 深色 (跟随系统, 未强制浅色时生效) ----
      与上面 [data-theme="dark"] 保持一致, 修改时两处需同步 */
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       color-scheme: dark;
-      --fx-bg: #000000;
-      --fx-fg: #fafafa;
-      --fx-card: #09090b;
-      --fx-card-bd: #27272a;
-      --fx-soft: #18181b;
-      --fx-border: #27272a;
-      --fx-muted: #a1a1aa;
-      --fx-faint: #71717a;
-      --fx-heading: #d4d4d8;
-      --fx-primary: #fafafa;
-      --fx-primary-fg: #09090b;
-      --fx-primary-hover: #e4e4e7;
-      --fx-control: #18181b;
-      --fx-control-hover: #27272a;
-      --fx-track: #27272a;
-      --fx-skeleton: #27272a;
-      --fx-drop-bd: #52525b;
-      --fx-stripe: rgba(255, 255, 255, .08);
-      --fx-shadow: rgba(0, 0, 0, .5);
-      --fx-ring: #fafafa;
+      --mv-bg: #000000;
+      --mv-fg: #fafafa;
+      --mv-card: #09090b;
+      --mv-card-bd: #27272a;
+      --mv-soft: #18181b;
+      --mv-border: #27272a;
+      --mv-muted: #a1a1aa;
+      --mv-faint: #71717a;
+      --mv-heading: #d4d4d8;
+      --mv-primary: #fafafa;
+      --mv-primary-fg: #09090b;
+      --mv-primary-hover: #e4e4e7;
+      --mv-control: #18181b;
+      --mv-control-hover: #27272a;
+      --mv-track: #27272a;
+      --mv-skeleton: #27272a;
+      --mv-drop-bd: #52525b;
+      --mv-stripe: rgba(255, 255, 255, .08);
+      --mv-shadow: rgba(0, 0, 0, .5);
+      --mv-ring: #fafafa;
+    --mv-destructive: #7f1d1d;
+    --mv-success: #059669;
+    --mv-warning: #d97706;
+    --mv-secondary: #27272a;
+    --mv-secondary-fg: #fafafa;
+    --mv-msg-bg: rgba(0, 0, 0, .8);
+    --mv-mask-bg: rgba(0, 0, 0, .4);
+    --mv-surface: #000000;
+    --mv-muted-20: rgba(39, 39, 42, .2);
+    --mv-border-40: rgba(39, 39, 42, .4);
+    --mv-destructive-50: rgba(127, 29, 29, .5);
+    --mv-success-50: rgba(5, 150, 105, .5);
+    --mv-warning-50: rgba(217, 119, 6, .5);
     }
   }
 
   * { -webkit-box-sizing: border-box; box-sizing: border-box; }
-  /* hidden 属性必须压过 .fx-dialog-wrap 等规则的显式 display, 否则浮层关不掉 */
+  /* hidden 属性必须压过 .mv-dialog-wrap 等规则的显式 display, 否则浮层关不掉 */
   [hidden] { display: none !important; }
   body {
     margin: 0;
     padding: 24px 16px 64px;
     font: 14px/1.6 -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     background: #f4f4f5;
-    background: var(--fx-bg);
+    background: var(--mv-bg);
     color: #18181b;
-    color: var(--fx-fg);
+    color: var(--mv-fg);
     -webkit-transition: background .2s ease, color .2s ease;
             transition: background .2s ease, color .2s ease;
   }
   .wrap { max-width: 960px; margin: 0 auto; }
   h1 { font-size: 22px; margin: 0 0 6px; }
-  h2 { font-size: 16px; margin: 0 0 12px; color: #3f3f46; color: var(--fx-heading); }
-  .lead { color: #71717a; color: var(--fx-muted); margin: 0 0 24px; }
-  .lead code { background: #e4e4e7; background: var(--fx-track); padding: 1px 5px; border-radius: 4px; }
+  h2 { font-size: 16px; margin: 0 0 12px; color: #3f3f46; color: var(--mv-heading); }
+  .lead { color: #71717a; color: var(--mv-muted); margin: 0 0 24px; }
+  .lead code { background: #e4e4e7; background: var(--mv-track); padding: 1px 5px; border-radius: 4px; }
   .theme-bar { margin: 0 0 18px; }
   .card {
-    background: #fff; background: var(--fx-card);
-    border: 1px solid #e4e4e7; border-color: var(--fx-card-bd); border-radius: 12px;
+    background: #fff; background: var(--mv-card);
+    border: 1px solid #e4e4e7; border-color: var(--mv-card-bd); border-radius: 12px;
     padding: 18px; margin-bottom: 18px;
-    box-shadow: 0 1px 2px rgba(0,0,0,.04); box-shadow: 0 1px 2px var(--fx-shadow);
+    box-shadow: 0 1px 2px rgba(0,0,0,.04); box-shadow: 0 1px 2px var(--mv-shadow);
   }
   .row { display: -webkit-box; display: -webkit-flex; display: flex;
          -webkit-flex-wrap: wrap; flex-wrap: wrap; -webkit-align-items: center; align-items: center; }
   .row > * { margin: 0 8px 8px 0; }
   .btn {
     display: inline-block; padding: 7px 14px; border-radius: 8px; cursor: pointer;
-    border: 1px solid #d4d4d8; border-color: var(--fx-border);
-    background: #fff; background: var(--fx-control);
-    color: #18181b; color: var(--fx-fg);
+    border: 1px solid #d4d4d8; border-color: var(--mv-border);
+    background: #fff; background: var(--mv-control);
+    color: #18181b; color: var(--mv-fg);
     font-size: 13px;
     -webkit-appearance: none; appearance: none;
     -webkit-transition: background .15s ease, border-color .15s ease, transform .15s ease;
@@ -127,144 +167,223 @@
   }
   .btn:active { -webkit-transform: scale(.97); transform: scale(.97); }
   .btn-dark {
-    background: #18181b; background: var(--fx-primary);
-    color: #fff; color: var(--fx-primary-fg);
-    border-color: #18181b; border-color: var(--fx-primary);
+    background: #18181b; background: var(--mv-primary);
+    color: #fff; color: var(--mv-primary-fg);
+    border-color: #18181b; border-color: var(--mv-primary);
   }
   /* hover 只在支持真实悬停的设备生效, 避免触屏 sticky hover 把深色按钮刷成浅底浅字 */
   @media (hover: hover) {
-    .btn:hover { background: #f4f4f5; background: var(--fx-control-hover); }
+    .btn:hover { background: #f4f4f5; background: var(--mv-control-hover); }
     .btn-dark:hover {
-      background: #27272a; background: var(--fx-primary-hover);
-      color: #fff; color: var(--fx-primary-fg);
-      border-color: #27272a; border-color: var(--fx-primary-hover);
+      background: #27272a; background: var(--mv-primary-hover);
+      color: #fff; color: var(--mv-primary-fg);
+      border-color: #27272a; border-color: var(--mv-primary-hover);
     }
   }
   .list { margin: 0; padding: 0; list-style: none; }
   .list li {
-    padding: 10px 12px; border: 1px solid #e4e4e7; border-color: var(--fx-card-bd);
+    padding: 10px 12px; border: 1px solid #e4e4e7; border-color: var(--mv-card-bd);
     border-radius: 8px; margin-bottom: 6px;
-    background: #fafafa; background: var(--fx-soft);
+    background: #fafafa; background: var(--mv-soft);
   }
   .node-item {
     display: inline-block; padding: 6px 10px; border-radius: 6px; margin: 0 6px 6px 0;
-    border: 1px solid #e4e4e7; border-color: var(--fx-card-bd);
-    background: #fafafa; background: var(--fx-soft);
+    border: 1px solid #e4e4e7; border-color: var(--mv-card-bd);
+    background: #fafafa; background: var(--mv-soft);
   }
   .swatch { width: 34px; height: 34px; border-radius: 8px; display: inline-block; vertical-align: middle;
-            border: 1px solid #e4e4e7; border-color: var(--fx-card-bd); }
+            border: 1px solid #e4e4e7; border-color: var(--mv-card-bd); }
   .swatch.s1 { background: #ef4444; } .swatch.s2 { background: #f59e0b; }
   .swatch.s3 { background: #10b981; } .swatch.s4 { background: #3b82f6; }
   .swatch.s5 { background: #8b5cf6; }
-  .star { font-size: 26px; color: #d4d4d8; color: var(--fx-border); cursor: pointer; padding: 0 2px; line-height: 1; }
+  .star { font-size: 26px; color: #d4d4d8; color: var(--mv-border); cursor: pointer; padding: 0 2px; line-height: 1; }
   .star.on { color: #f59e0b; }
   .tip {
     position: relative; display: inline-block; padding: 8px 12px; border-radius: 8px;
-    background: #18181b; background: var(--fx-primary);
-    color: #fff; color: var(--fx-primary-fg); font-size: 13px;
+    background: #18181b; background: var(--mv-primary);
+    color: #fff; color: var(--mv-primary-fg); font-size: 13px;
   }
-  .faint { color: #a1a1aa; color: var(--fx-faint); }
+  .faint { color: #a1a1aa; color: var(--mv-faint); }
   .pulse-bar { display: inline-block; width: 40px; height: 14px; border-radius: 4px;
-               background: #e4e4e7; background: var(--fx-track); }
-  .skeleton { position: relative; overflow: hidden; background: #f4f4f5; background: var(--fx-skeleton); border-radius: 6px; }
+               background: #e4e4e7; background: var(--mv-track); }
+  .skeleton { position: relative; overflow: hidden; background: #f4f4f5; background: var(--mv-skeleton); border-radius: 6px; }
   .skeleton .shimmer {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     background: -webkit-linear-gradient(left, rgba(255,255,255,0) 0%, rgba(255,255,255,.9) 50%, rgba(255,255,255,0) 100%);
     background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.9) 50%, rgba(255,255,255,0) 100%);
   }
-  .bar { height: 34px; background-color: #e4e4e7; background-color: var(--fx-track); border-radius: 6px;
+  .bar { height: 34px; background-color: #e4e4e7; background-color: var(--mv-track); border-radius: 6px;
          background-image: -webkit-linear-gradient(45deg, rgba(0,0,0,.06) 25%, transparent 25%, transparent 50%, rgba(0,0,0,.06) 50%, rgba(0,0,0,.06) 75%, transparent 75%, transparent);
-         background-image: linear-gradient(45deg, var(--fx-stripe) 25%, transparent 25%, transparent 50%, var(--fx-stripe) 50%, var(--fx-stripe) 75%, transparent 75%, transparent);
+         background-image: linear-gradient(45deg, var(--mv-stripe) 25%, transparent 25%, transparent 50%, var(--mv-stripe) 50%, var(--mv-stripe) 75%, transparent 75%, transparent);
          background-size: 1rem 1rem; }
   table { width: 100%; border-collapse: collapse; }
-  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid #f0f0f0; border-bottom-color: var(--fx-card-bd); font-size: 13px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid #f0f0f0; border-bottom-color: var(--mv-card-bd); font-size: 13px; }
   .spinner { display: inline-block; width: 22px; height: 22px; border-radius: 50%;
-             border: 3px solid #e4e4e7; border-color: var(--fx-track);
-             border-top-color: #18181b; border-top-color: var(--fx-primary); }
+             border: 3px solid #e4e4e7; border-color: var(--mv-track);
+             border-top-color: #18181b; border-top-color: var(--mv-primary); }
   .dot-wrap { position: relative; display: inline-block; width: 12px; height: 12px; }
-  .dot { position: absolute; width: 12px; height: 12px; border-radius: 50%; background: #18181b; background: var(--fx-primary); }
+  .dot { position: absolute; width: 12px; height: 12px; border-radius: 50%; background: #18181b; background: var(--mv-primary); }
   .drop {
-    border: 2px dashed #a1a1aa; border-color: var(--fx-drop-bd); border-radius: 12px;
+    border: 2px dashed #a1a1aa; border-color: var(--mv-drop-bd); border-radius: 12px;
     padding: 24px; text-align: center;
-    color: #71717a; color: var(--fx-muted);
-    background: #fafafa; background: var(--fx-soft); cursor: pointer;
+    color: #71717a; color: var(--mv-muted);
+    background: #fafafa; background: var(--mv-soft); cursor: pointer;
   }
   .panel-body {
     padding: 12px; border-radius: 8px; margin-top: 8px;
-    border: 1px solid #e4e4e7; border-color: var(--fx-card-bd);
-    background: #fafafa; background: var(--fx-soft);
+    border: 1px solid #e4e4e7; border-color: var(--mv-card-bd);
+    background: #fafafa; background: var(--mv-soft);
   }
-  .cal { width: 220px; border: 1px solid #e4e4e7; border-color: var(--fx-card-bd); border-radius: 10px; padding: 12px; background: #fff; background: var(--fx-card); }
+  .cal { width: 220px; border: 1px solid #e4e4e7; border-color: var(--mv-card-bd); border-radius: 10px; padding: 12px; background: #fff; background: var(--mv-card); }
   .cal-head { display: -webkit-box; display: -webkit-flex; display: flex;
               -webkit-justify-content: space-between; justify-content: space-between; margin-bottom: 8px; }
   .cal-grid { display: -webkit-box; display: -webkit-flex; display: flex; -webkit-flex-wrap: wrap; flex-wrap: wrap; }
-  .cal-grid span { width: 14.28%; text-align: center; padding: 4px 0; font-size: 12px; color: #52525b; color: var(--fx-muted); }
-  .note { font-size: 12px; color: #a1a1aa; color: var(--fx-faint); margin-top: 10px; }
+  .cal-grid span { width: 14.28%; text-align: center; padding: 4px 0; font-size: 12px; color: #52525b; color: var(--mv-muted); }
+  .note { font-size: 12px; color: #a1a1aa; color: var(--mv-faint); margin-top: 10px; }
   .lift-box {
     padding: 14px 18px; border-radius: 10px;
-    border: 1px solid #e4e4e7; border-color: var(--fx-card-bd);
-    background: #fff; background: var(--fx-card);
+    border: 1px solid #e4e4e7; border-color: var(--mv-card-bd);
+    background: #fff; background: var(--mv-card);
   }
 
   /* 第 10-11 节演示样式: 浮层 / 通知 / 菜单 / 告警 */
-  .fx-mask {
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0, 0, 0, .4); z-index: 90;
+  .mv-mask {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 90;
+    background: rgba(255, 255, 255, .6);
+    background: var(--mv-mask-bg, rgba(255, 255, 255, .6));
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
   }
-  .fx-dialog-wrap {
+  .mv-dialog-wrap {
     position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 91;
     display: -webkit-box; display: -webkit-flex; display: flex;
     -webkit-box-align: center; -webkit-align-items: center; align-items: center;
     -webkit-box-pack: center; -webkit-justify-content: center; justify-content: center;
-    pointer-events: none;
+    padding: 16px; overflow-y: auto; pointer-events: none;
   }
-  .fx-dialog {
-    pointer-events: auto;
-    width: 320px; padding: 18px; border-radius: 12px;
-    border: 1px solid #e4e4e7; border-color: var(--fx-card-bd);
-    background: #fff; background: var(--fx-card);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, .3);
+  /* 原站: max-w-md(448px) + 8px 圆角 + 0 20px 50px rgba(0,0,0,.2) */
+  .mv-dialog {
+    pointer-events: auto; position: relative; width: 100%; max-width: 448px;
+    display: -webkit-box; display: -webkit-flex; display: flex;
+    -webkit-box-orient: vertical; -webkit-flex-direction: column; flex-direction: column;
+    overflow: hidden; border: 1px solid rgba(228, 228, 231, .8);
+    border-color: var(--mv-card-bd, #e4e4e7); border-radius: 8px;
+    background: #fff; background: var(--mv-surface, #fff);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, .2);
   }
-  .fx-dialog-title { font-size: 15px; font-weight: 600; margin: 0 0 6px; color: #18181b; color: var(--fx-fg); }
-  .fx-dialog-desc { font-size: 13px; color: #71717a; color: var(--fx-muted); margin: 0; }
-  .fx-drawer {
+  .mv-dialog-head {
+    display: -webkit-box; display: -webkit-flex; display: flex;
+    -webkit-box-align: start; -webkit-align-items: flex-start; align-items: flex-start;
+    -webkit-box-pack: justify; -webkit-justify-content: space-between; justify-content: space-between;
+    padding: 18px;
+  }
+  .mv-dialog-head.has-body { padding-bottom: 16px; border-bottom: 1px solid rgba(228, 228, 231, .4); border-bottom-color: var(--mv-border-40, rgba(228, 228, 231, .4)); }
+  .mv-dialog-headmain {
+    display: -webkit-box; display: -webkit-flex; display: flex;
+    -webkit-box-align: start; -webkit-align-items: flex-start; align-items: flex-start;
+    padding-right: 24px; min-width: 0;
+  }
+  .mv-dialog-icon {
+    display: block; width: 20px; height: 20px; margin: 2px 14px 0 0;
+    -webkit-flex-shrink: 0; flex-shrink: 0; color: #f59e0b; color: var(--mv-warning, #f59e0b);
+  }
+  .mv-dialog-headtext { min-width: 0; }
+  .mv-dialog-title {
+    margin: 0; font-size: 14px; font-weight: 800; line-height: 1.25;
+    letter-spacing: -.025em; color: #09090b; color: var(--mv-fg, #09090b);
+  }
+  .mv-dialog-desc {
+    margin: 4px 0 0; font-size: 12px; line-height: 1.625;
+    color: #71717a; color: var(--mv-muted, #71717a);
+    word-wrap: break-word;
+  }
+  .mv-dialog-body {
+    padding: 20px; font-size: 12px; line-height: 1.625;
+    color: #71717a; color: var(--mv-muted, #71717a);
+  }
+  .mv-dialog-foot {
+    display: -webkit-box; display: -webkit-flex; display: flex;
+    -webkit-box-align: center; -webkit-align-items: center; align-items: center;
+    -webkit-box-pack: end; -webkit-justify-content: flex-end; justify-content: flex-end;
+    padding: 14px 18px;
+    background: rgba(244, 244, 245, .2);
+    background: var(--mv-muted-20, rgba(244, 244, 245, .2));
+    border-top: 1px solid rgba(228, 228, 231, .4); border-top-color: var(--mv-border-40, rgba(228, 228, 231, .4));
+  }
+  .mv-icon-btn {
+    display: -webkit-box; display: -webkit-flex; display: flex;
+    -webkit-box-align: center; -webkit-align-items: center; align-items: center;
+    -webkit-box-pack: center; -webkit-justify-content: center; justify-content: center;
+    margin-left: auto; padding: 4px; border: 0; border-radius: 4px;
+    background: transparent; color: #71717a; color: var(--mv-muted, #71717a);
+    cursor: pointer; -webkit-flex-shrink: 0; flex-shrink: 0;
+  }
+  .mv-icon-btn svg { display: block; width: 16px; height: 16px; }
+  .mv-btn {
+    display: -webkit-inline-box; display: -webkit-inline-flex; display: inline-flex;
+    -webkit-box-align: center; -webkit-align-items: center; align-items: center;
+    -webkit-box-pack: center; -webkit-justify-content: center; justify-content: center;
+    padding: 6px 14px; border: 1px solid rgba(228, 228, 231, .4); border-radius: 8px;
+    background: #f4f4f5; background: var(--mv-secondary, #f4f4f5);
+    color: #18181b; color: var(--mv-secondary-fg, #18181b);
+    font-size: 12px; font-weight: 700; line-height: 1.5; cursor: pointer;
+    -webkit-transition: background-color .3s, opacity .3s; transition: background-color .3s, opacity .3s;
+  }
+  .mv-btn-primary {
+    background: #18181b; background: var(--mv-primary, #18181b);
+    color: #fafafa; color: var(--mv-primary-fg, #fafafa);
+    border-color: transparent;
+  }
+  .mv-btn + .mv-btn { margin-left: 10px; }
+  .mv-btn:active { -webkit-transform: scale(.96); transform: scale(.96); }
+  @media (hover: hover) {
+    .mv-btn:hover { background: #e4e4e7; background: var(--mv-control-hover, #e4e4e7); }
+    .mv-btn-primary:hover { opacity: .9; }
+    .mv-icon-btn:hover { background: #f4f4f5; background: var(--mv-secondary, #f4f4f5); }
+  }
+  @media (min-width: 640px) {
+    .mv-dialog-head { padding: 20px; }
+    .mv-dialog-head.has-body { padding-bottom: 16px; }
+    .mv-dialog-title { font-size: 16px; }
+    .mv-dialog-foot { padding: 14px 20px; }
+  }
+  .mv-drawer {
     position: fixed; top: 0; right: 0; bottom: 0; z-index: 91;
     width: 300px; padding: 18px; overflow: auto;
-    border-left: 1px solid #e4e4e7; border-left-color: var(--fx-card-bd);
-    background: #fff; background: var(--fx-card);
+    border-left: 1px solid #e4e4e7; border-left-color: var(--mv-card-bd);
+    background: #fff; background: var(--mv-surface);
     box-shadow: 0 20px 60px rgba(0, 0, 0, .35);
   }
-  .fx-menu {
+  .mv-menu {
     position: absolute; top: 100%; left: 0; margin-top: 4px; z-index: 80;
     min-width: 140px; padding: 4px 0; border-radius: 8px;
-    background: #fff; background: var(--fx-card);
-    border: 1px solid #e4e4e7; border-color: var(--fx-card-bd);
+    background: #fff; background: var(--mv-card);
+    border: 1px solid #e4e4e7; border-color: var(--mv-card-bd);
     box-shadow: 0 10px 30px rgba(0, 0, 0, .12);
   }
-  .fx-menu-item { padding: 8px 14px; font-size: 13px; color: #18181b; color: var(--fx-fg); cursor: pointer; }
-  .fx-menu-item + .fx-menu-item { border-top: 1px solid #e4e4e7; border-top-color: var(--fx-card-bd); }
-  .fx-menu-danger { color: #ef4444; }
+  .mv-menu-item { padding: 8px 14px; font-size: 13px; color: #18181b; color: var(--mv-fg); cursor: pointer; }
+  .mv-menu-item + .mv-menu-item { border-top: 1px solid #e4e4e7; border-top-color: var(--mv-card-bd); }
+  .mv-menu-danger { color: #ef4444; }
   @media (hover: hover) {
-    .fx-menu-item:hover { background: #fafafa; background: var(--fx-soft); }
+    .mv-menu-item:hover { background: #fafafa; background: var(--mv-soft); }
   }
-  .fx-alert {
+  .mv-alert {
     display: -webkit-box; display: -webkit-flex; display: flex;
     padding: 12px; margin-top: 14px; border-radius: 8px;
     border: 1px solid #fcd34d;
     background: #fefce8;
   }
-  .fx-alert-icon {
+  .mv-alert-icon {
     display: inline-block; width: 34px; height: 34px; min-width: 34px;
     border-radius: 50%; background: #f59e0b; color: #fff;
     font-weight: 700; font-size: 16px; line-height: 34px; text-align: center;
   }
-  .fx-alert-body { font-size: 13px; color: #71717a; color: var(--fx-muted); margin-top: 4px; max-height: 200px; overflow: hidden; }
+  .mv-alert-body { font-size: 13px; color: #71717a; color: var(--mv-muted); margin-top: 4px; max-height: 200px; overflow: hidden; }
 
   /* 第 7-9 节演示样式 */
-  .tabs { position: relative; display: -webkit-box; display: -webkit-flex; display: flex; border-bottom: 1px solid #e4e4e7; border-bottom-color: var(--fx-card-bd); }
-  .tab { background: none; border: 0; padding: 8px 14px; cursor: pointer; font-size: 13px; color: #71717a; color: var(--fx-muted); }
-  .tab.on { color: #18181b; color: var(--fx-fg); font-weight: 600; }
-  .indicator { position: absolute; bottom: -1px; left: 0; height: 2px; width: 0; background: #18181b; background: var(--fx-primary); }
+  .tabs { position: relative; display: -webkit-box; display: -webkit-flex; display: flex; border-bottom: 1px solid #e4e4e7; border-bottom-color: var(--mv-card-bd); }
+  .tab { background: none; border: 0; padding: 8px 14px; cursor: pointer; font-size: 13px; color: #71717a; color: var(--mv-muted); }
+  .tab.on { color: #18181b; color: var(--mv-fg); font-weight: 600; }
+  .indicator { position: absolute; bottom: -1px; left: 0; height: 2px; width: 0; background: #18181b; background: var(--mv-primary); }
   .car-view { overflow: hidden; max-width: 320px; }
   .car-track { display: -webkit-box; display: -webkit-flex; display: flex; width: 300%; }
   .car-item { width: 33.3333%; padding: 22px; text-align: center; -webkit-box-sizing: border-box; box-sizing: border-box; }
@@ -277,9 +396,10 @@
     <button class="btn" id="forceLight">强制浅色</button>
     <button class="btn" id="forceDark">强制深色</button>
     <span class="note" id="themeState" style="margin-top:0">-</span>
+    <span class="note" id="buildTag" style="margin-top:0; margin-left:auto; color:#a1a1aa">MonoVanilla · build 261017-9</span>
   </div>
 
-  <h1>Fuxsto 兼容动画包 · 演示</h1>
+  <h1>MonoVanilla 兼容动画包 · 演示</h1>
   <p class="lead">
     从 <code>design.fuxsto.cn</code> 抽取并向下兼容改写。目标：Chrome 38 可运行 / Chrome 49 完整。
     可用老浏览器直接打开本页验证效果。
@@ -288,7 +408,7 @@
   <!-- 1. 入场揭示 -->
   <div class="card">
     <h2>1. 入场揭示 · rowFade + 逐行错峰</h2>
-    <ul class="list fx-stagger" id="staggerList">
+    <ul class="list mv-stagger" id="staggerList">
       <li class="animate-row-fade">列表项 01 — rowFade</li>
       <li class="animate-row-fade">列表项 02 — rowFade</li>
       <li class="animate-row-fade">列表项 03 — rowFade</li>
@@ -300,7 +420,7 @@
       <button class="btn" id="replayTree">tree-node-item</button>
       <button class="btn" id="replayCascader">animate-cascader-col</button>
     </div>
-    <p class="note">错峰由 .fx-stagger > :nth-child(n) 实现，Chrome 38 无需 CSS 变量即可工作。</p>
+    <p class="note">错峰由 .mv-stagger > :nth-child(n) 实现，Chrome 38 无需 CSS 变量即可工作。</p>
   </div>
 
   <!-- 2. 弹出 -->
@@ -356,7 +476,7 @@
         <div class="shimmer animate-kinetic-shimmer"></div>
       </div>
     </div>
-    <p style="font-size:18px; font-weight:600" class="fuxsto-text-shimmer">正在生成 · Fuxsto Text Shimmer</p>
+    <p style="font-size:18px; font-weight:600" class="mv-text-shimmer">正在生成 · MonoVanilla Text Shimmer</p>
     <div class="bar animate-progress-stripe" style="margin-top:14px"></div>
     <table style="margin-top:16px">
       <thead><tr><th>名称</th><th>状态</th></tr></thead>
@@ -386,7 +506,7 @@
   <div class="card">
     <h2>6. 折叠面板 · Element.animate() 高度补间（含 ES5 回退）</h2>
     <button class="btn btn-dark" id="togglePanel">展开 / 收起</button>
-    <div class="fx-collapsible" id="collapsible" style="height:0;overflow:hidden">
+    <div class="mv-collapsible" id="collapsible" style="height:0;overflow:hidden">
       <div class="panel-body">
         展开时高度 0 -&gt; 内容高，同时淡入；收起时相反。<br>
         优先使用 Web Animations API，无 WAAPI 的老浏览器回退到 requestAnimationFrame 线性补间。<br>
@@ -413,8 +533,8 @@
   <div class="card">
     <h2>8. 交互过渡 · press / lift</h2>
     <div class="row">
-      <button class="btn btn-dark fx-press">按压缩小 fx-press</button>
-      <div class="fx-lift lift-box">悬停上浮 fx-lift</div>
+      <button class="btn btn-dark mv-press">按压缩小 mv-press</button>
+      <div class="mv-lift lift-box">悬停上浮 mv-lift</div>
     </div>
   </div>
 
@@ -425,10 +545,10 @@
       <button class="tab on" data-i="0">标签一</button>
       <button class="tab" data-i="1">标签二</button>
       <button class="tab" data-i="2">标签三</button>
-      <span class="indicator fx-indicator" id="ind"></span>
+      <span class="indicator mv-indicator" id="ind"></span>
     </div>
     <div class="car-view" style="margin-top:14px">
-      <div class="car-track fx-slide-track" id="carTrack">
+      <div class="car-track mv-slide-track" id="carTrack">
         <div class="car-item">幻灯片 1</div>
         <div class="car-item">幻灯片 2</div>
         <div class="car-item">幻灯片 3</div>
@@ -440,7 +560,7 @@
     </div>
     <div style="margin-top:14px">
       <button class="btn btn-dark" id="revealBtn">展开 / 收起 reveal</button>
-      <div class="fx-reveal" id="revealBox"><div class="panel-body">max-height 过渡揭示，可用于 StreamingText 展开、面板显示。</div></div>
+      <div class="mv-reveal" id="revealBox"><div class="panel-body">max-height 过渡揭示，可用于 StreamingText 展开、面板显示。</div></div>
     </div>
   </div>
 
@@ -460,7 +580,7 @@
        <button class="btn" id="notifBottom">底部通知</button>
        <button class="btn" id="notifCloseAll">全部关闭</button>
      </div>
-     <p class="note">原站 Message / Notification 是命令式 API（无组件, 只有函数）。这里用 FxAnim.message() / FxAnim.notification() 原生复刻：堆叠、自动消失、FLIP 位移动画, 过渡类名与原站 Vue &lt;Transition&gt; 钩子一一对应。</p>
+     <p class="note">原站 Message / Notification 是命令式 API（无组件, 只有函数）。这里用 MVAnim.message() / MVAnim.notification() 原生复刻：堆叠、自动消失、FLIP 位移动画, 过渡类名与原站 Vue &lt;Transition&gt; 钩子一一对应。</p>
    </div>
 
    <!-- 11. 浮层: 对话框 / 抽屉 / 菜单 / 告警 -->
@@ -473,18 +593,18 @@
      <div class="row" style="margin-top:4px; display:block">
        <span style="position:relative; display:inline-block">
          <button class="btn" id="menuToggle">菜单下拉</button>
-         <div class="fx-menu" id="menuPanel" hidden>
-           <div class="fx-menu-item">重命名</div>
-           <div class="fx-menu-item">复制</div>
-           <div class="fx-menu-item fx-menu-danger">移到回收站</div>
+         <div class="mv-menu" id="menuPanel" hidden>
+           <div class="mv-menu-item">重命名</div>
+           <div class="mv-menu-item">复制</div>
+           <div class="mv-menu-item mv-menu-danger">移到回收站</div>
          </div>
        </span>
      </div>
-     <div class="fx-alert" style="display:block">
-       <span class="fx-alert-icon" id="alertIcon">!</span>
+     <div class="mv-alert" style="display:block">
+       <span class="mv-alert-icon" id="alertIcon">!</span>
        <div style="-webkit-box-flex:1; -webkit-flex:1; flex:1; margin-left:10px">
-         <div style="font-size:13px; font-weight:600; color:#18181b; color:var(--fx-fg)">支付失败</div>
-         <div class="fx-alert-body" id="alertBody" style="display:none">卡号被发卡行拒绝，请检查后重试。</div>
+         <div style="font-size:13px; font-weight:600; color:#18181b; color:var(--mv-fg)">支付失败</div>
+         <div class="mv-alert-body" id="alertBody" style="display:none">卡号被发卡行拒绝，请检查后重试。</div>
        </div>
      </div>
      <div class="row" style="margin-top:10px">
@@ -493,29 +613,40 @@
      <p class="note">对话框 = dialog-pop（面板 16px 模糊 + 0.92 缩放）+ dialog-mask（遮罩淡入）；抽屉 = drawer-right（整侧滑入）；菜单 = dropdown（左上角原点缩放 + 模糊）。点击遮罩外或菜单外部会关闭菜单。</p>
    </div>
 
-   <p class="note">FxAnim.hasAnimate() = <span id="waapi">-</span> / FxAnim.reduced() = <span id="reduced">-</span></p>
+   <p class="note">MVAnim.hasAnimate() = <span id="waapi">-</span> / MVAnim.reduced() = <span id="reduced">-</span></p>
  </div>
 
- <div class="fx-mask" id="dlgMask" hidden></div>
- <div class="fx-dialog-wrap" id="dlgWrap" hidden>
-   <div class="fx-dialog" id="dlgPanel">
-     <div class="fx-dialog-title">放弃这次编辑？</div>
-     <div class="fx-dialog-desc">未保存的改动会丢失。</div>
-     <div class="row" style="margin-top:14px">
-       <button class="btn" id="dlgCancel">取消</button>
-       <button class="btn btn-dark" id="dlgOk">确认</button>
+ <div class="mv-mask" id="dlgMask" hidden></div>
+ <div class="mv-dialog-wrap" id="dlgWrap" hidden>
+   <div class="mv-dialog" id="dlgPanel" role="dialog" aria-modal="true" aria-labelledby="dlgTitle">
+     <div class="mv-dialog-head has-body">
+       <div class="mv-dialog-headmain">
+         <svg class="mv-dialog-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+         <div class="mv-dialog-headtext">
+           <h3 class="mv-dialog-title" id="dlgTitle">放弃这次编辑？</h3>
+           <p class="mv-dialog-desc">未保存的改动会丢失。</p>
+         </div>
+       </div>
+       <button type="button" class="mv-icon-btn" id="dlgClose" aria-label="关闭">
+         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+       </button>
+     </div>
+     <div class="mv-dialog-body">关闭后，本次会话里未提交的字段会恢复为上次保存的内容。</div>
+     <div class="mv-dialog-foot">
+       <button type="button" class="mv-btn" id="dlgCancel">取消</button>
+       <button type="button" class="mv-btn mv-btn-primary" id="dlgOk">确认</button>
      </div>
    </div>
  </div>
- <div class="fx-mask" id="drwMask" hidden></div>
- <div class="fx-drawer" id="drwPanel" hidden>
-   <div class="fx-dialog-title">筛选条件</div>
-   <div class="fx-dialog-desc" style="margin-bottom:14px">设置好之后点确认</div>
+ <div class="mv-mask" id="drwMask" hidden></div>
+ <div class="mv-drawer" id="drwPanel" hidden>
+   <div class="mv-dialog-title">筛选条件</div>
+   <div class="mv-dialog-desc" style="margin-bottom:14px">设置好之后点确认</div>
    <button class="btn btn-dark" id="drwClose">关闭抽屉</button>
  </div>
 
 
-<script src="fuxsto-anim.js?v=4"></script>
+<script src="monovanilla-anim.js"></script>
 <script>
 (function () {
   'use strict';
@@ -571,17 +702,17 @@
   })();
 
   /* 环境信息 */
-  if ($('waapi')) { $('waapi').innerHTML = FxAnim.hasAnimate() ? 'true' : 'false'; }
-  if ($('reduced')) { $('reduced').innerHTML = FxAnim.reduced() ? 'true' : 'false'; }
+  if ($('waapi')) { $('waapi').innerHTML = MVAnim.hasAnimate() ? 'true' : 'false'; }
+  if ($('reduced')) { $('reduced').innerHTML = MVAnim.reduced() ? 'true' : 'false'; }
 
   /* 1. 入场揭示 */
   function replayAll(sel, cls) {
     var nodes = document.querySelectorAll(sel);
-    for (var i = 0; i < nodes.length; i++) { FxAnim.replay(nodes[i], cls); }
+    for (var i = 0; i < nodes.length; i++) { MVAnim.replay(nodes[i], cls); }
   }
   if ($('replayRows')) {
     $('replayRows').onclick = function () {
-      FxAnim.stagger($('staggerList'), 40, 400);
+      MVAnim.stagger($('staggerList'), 40, 400);
       replayAll('#staggerList > li', 'animate-row-fade');
     };
   }
@@ -599,7 +730,7 @@
     document.getElementById('replayTree').parentNode.appendChild(host);
     $('replayTree').onclick = function () {
       var n = host.children;
-      for (var i = 0; i < n.length; i++) { FxAnim.replay(n[i], 'tree-node-item'); }
+      for (var i = 0; i < n.length; i++) { MVAnim.replay(n[i], 'tree-node-item'); }
     };
     $('replayCascader').onclick = function () {
       var el = document.createElement('div');
@@ -613,7 +744,7 @@
   function playOnce(el, cls, baseStyle) {
     el.style.display = baseStyle || '';
     el.style.visibility = 'visible';
-    FxAnim.replay(el, cls);
+    MVAnim.replay(el, cls);
   }
   if ($('popTip')) {
     $('popTip').onclick = function () { playOnce($('tipDemo'), 'animate-tip-pop'); };
@@ -621,14 +752,14 @@
   if ($('popPanel')) {
     $('popPanel').onclick = function () {
       $('panelDemo').style.display = 'block';
-      FxAnim.replay($('panelDemo'), 'color-panel-enter-active');
+      MVAnim.replay($('panelDemo'), 'color-panel-enter-active');
     };
   }
   if ($('popSwatch')) {
     $('popSwatch').onclick = function () {
       $('sw1').style.visibility = 'visible';
       var els = document.querySelectorAll('.color-swatch-pop');
-      for (var i = 0; i < els.length; i++) { FxAnim.replay(els[i], 'color-swatch-pop'); }
+      for (var i = 0; i < els.length; i++) { MVAnim.replay(els[i], 'color-swatch-pop'); }
     };
   }
   /* 星级 */
@@ -642,7 +773,7 @@
           for (var j = 0; j < stars.length; j++) {
             if (j <= idx) { stars[j].className = 'star on'; } else { stars[j].className = 'star'; }
           }
-          FxAnim.replay(star, 'rate-star-pop');
+          MVAnim.replay(star, 'rate-star-pop');
         };
       })(stars[i], i);
     }
@@ -669,15 +800,15 @@
     render();
     $('calOpen').onclick = function () {
       panel.style.display = 'block';
-      FxAnim.replay(panel, 'calendar-panel-enter-active');
+      MVAnim.replay(panel, 'calendar-panel-enter-active');
     };
-    $('calPrev').onclick = function () { m--; if (m < 0) { m = 11; y--; } render(); FxAnim.replay(grid, 'calendar-view-enter-left'); };
-    $('calNext').onclick = function () { m++; if (m > 11) { m = 0; y++; } render(); FxAnim.replay(grid, 'calendar-view-enter-right'); };
+    $('calPrev').onclick = function () { m--; if (m < 0) { m = 11; y--; } render(); MVAnim.replay(grid, 'calendar-view-enter-left'); };
+    $('calNext').onclick = function () { m++; if (m > 11) { m = 0; y++; } render(); MVAnim.replay(grid, 'calendar-view-enter-right'); };
   })();
 
   /* 5. 反馈 */
   if ($('shakeBtn')) {
-    $('shakeBtn').onclick = function () { FxAnim.replay($('shakeBtn'), 'animate-shake'); };
+    $('shakeBtn').onclick = function () { MVAnim.replay($('shakeBtn'), 'animate-shake'); };
   }
   if ($('dropToggle')) {
     $('dropToggle').onclick = function () {
@@ -696,7 +827,7 @@
     if (!el) { return; }
     var open = false;
     $('togglePanel').onclick = function () {
-      if (open) { FxAnim.collapse(el); } else { FxAnim.expand(el); }
+      if (open) { MVAnim.collapse(el); } else { MVAnim.expand(el); }
       open = !open;
     };
   })();
@@ -707,11 +838,11 @@
     if (!list) { return; }
     function run(step, lite) {
       var kids = list.children;
-      for (var i = 0; i < kids.length; i++) { FxAnim.enter(kids[i], i * step, lite); }
+      for (var i = 0; i < kids.length; i++) { MVAnim.enter(kids[i], i * step, lite); }
     }
     if ($('replayEntry')) { $('replayEntry').onclick = function () { run(80, false); }; }
     if ($('replayEntryLite')) { $('replayEntryLite').onclick = function () { run(80, true); }; }
-    if ($('replayEntryDelay')) { $('replayEntryDelay').onclick = function () { FxAnim.enter(list.children[0], 200, false); }; }
+    if ($('replayEntryDelay')) { $('replayEntryDelay').onclick = function () { MVAnim.enter(list.children[0], 200, false); }; }
     setTimeout(function () { run(80, false); }, 100);
   })();
 
@@ -722,7 +853,7 @@
     if (tabs && ind) {
       var btns = tabs.getElementsByTagName('button');
       function move(btn) {
-        FxAnim.slideTo(ind, btn.offsetLeft, btn.offsetWidth);
+        MVAnim.slideTo(ind, btn.offsetLeft, btn.offsetWidth);
       }
       for (var i = 0; i < btns.length; i++) {
         (function (b) {
@@ -742,7 +873,7 @@
       function go(n) {
         idx = (n + total) % total;
         var w = track.parentNode.clientWidth;
-        FxAnim.translateX(track, -idx * w, 500);
+        MVAnim.translateX(track, -idx * w, 500);
       }
       if ($('carPrev')) { $('carPrev').onclick = function () { go(idx - 1); }; }
       if ($('carNext')) { $('carNext').onclick = function () { go(idx + 1); }; }
@@ -751,47 +882,38 @@
     var box = $('revealBox');
     if (box && $('revealBtn')) {
       var ropen = false;
-      $('revealBtn').onclick = function () { ropen = !ropen; FxAnim.reveal(box, ropen); };
+      $('revealBtn').onclick = function () { ropen = !ropen; MVAnim.reveal(box, ropen); };
     }
   })();
 
   /* 10. Message / Notification (命令式) */
   (function () {
-    if ($('msgSuccess')) { $('msgSuccess').onclick = function () { FxAnim.message({ type: 'success', text: '订单已提交' }); }; }
-    if ($('msgError')) { $('msgError').onclick = function () { FxAnim.message({ type: 'error', text: '库存不足，无法下单' }); }; }
-    if ($('msgWarn')) { $('msgWarn').onclick = function () { FxAnim.message({ type: 'warning', text: '该地址不支持货到付款' }); }; }
-    if ($('msgInfo')) { $('msgInfo').onclick = function () { FxAnim.message({ type: 'info', text: '正在为你重新计算运费' }); }; }
-    if ($('msgSticky')) { $('msgSticky').onclick = function () { FxAnim.message({ type: 'info', text: '这条要手动关', duration: 0, closable: true }); }; }
-    if ($('notifRight')) { $('notifRight').onclick = function () { FxAnim.notification({ side: 'right', title: '部署完成', text: 'v0.1.1 已发布到生产环境。', closable: true }); }; }
-    if ($('notifLeft')) { $('notifLeft').onclick = function () { FxAnim.notification({ side: 'left', title: '换个位置', text: 'placement: top-left' }); }; }
-    if ($('notifBottom')) { $('notifBottom').onclick = function () { FxAnim.notification({ side: 'bottom', title: '证书即将过期', text: '还有 7 天。', duration: 0, closable: true }); }; }
-    if ($('notifCloseAll')) { $('notifCloseAll').onclick = function () { FxAnim.closeAllMessages(); FxAnim.closeAllNotifs(); }; }
+    if ($('msgSuccess')) { $('msgSuccess').onclick = function () { MVAnim.message({ type: 'success', text: '订单已提交' }); }; }
+    if ($('msgError')) { $('msgError').onclick = function () { MVAnim.message({ type: 'error', text: '库存不足，无法下单' }); }; }
+    if ($('msgWarn')) { $('msgWarn').onclick = function () { MVAnim.message({ type: 'warning', text: '该地址不支持货到付款' }); }; }
+    if ($('msgInfo')) { $('msgInfo').onclick = function () { MVAnim.message({ type: 'info', text: '正在为你重新计算运费' }); }; }
+    if ($('msgSticky')) { $('msgSticky').onclick = function () { MVAnim.message({ type: 'info', text: '这条要手动关', duration: 0, closable: true }); }; }
+    if ($('notifRight')) { $('notifRight').onclick = function () { MVAnim.notification({ side: 'right', title: '部署完成', text: 'v0.1.1 已发布到生产环境。', closable: true }); }; }
+    if ($('notifLeft')) { $('notifLeft').onclick = function () { MVAnim.notification({ side: 'left', title: '换个位置', text: 'placement: top-left' }); }; }
+    if ($('notifBottom')) { $('notifBottom').onclick = function () { MVAnim.notification({ side: 'bottom', title: '证书即将过期', text: '还有 7 天。', duration: 0, closable: true }); }; }
+    if ($('notifCloseAll')) { $('notifCloseAll').onclick = function () { MVAnim.closeAllMessages(); MVAnim.closeAllNotifs(); }; }
   })();
 
   /* 11. 浮层: 对话框 / 抽屉 / 菜单 / 告警 */
   (function () {
     function showOverlay(maskId, elId, panelName, wrapId) {
-      var mask = $(maskId), el = $(elId);
-      if (!mask || !el) { return; }
-      mask.hidden = false;
-      if (wrapId) { $(wrapId).hidden = false; }
-      FxAnim.overlayEnter(mask, 'dialog-mask');
-      FxAnim.overlayEnter(el, panelName);
+      MVAnim.overlayOpen($(maskId), $(elId), wrapId ? $(wrapId) : null, panelName);
     }
     function hideOverlay(maskId, elId, panelName, wrapId) {
-      var mask = $(maskId), el = $(elId);
-      if (!mask || !el) { return; }
-      FxAnim.overlayLeave(el, panelName, function () {
-        if (wrapId) { $(wrapId).hidden = true; }
-      });
-      FxAnim.overlayLeave(mask, 'dialog-mask', function () { mask.hidden = true; });
+      MVAnim.overlayClose($(maskId), $(elId), wrapId ? $(wrapId) : null, panelName);
     }
     if ($('dlgOpen')) { $('dlgOpen').onclick = function () { showOverlay('dlgMask', 'dlgPanel', 'dialog-pop', 'dlgWrap'); }; }
     if ($('dlgCancel')) { $('dlgCancel').onclick = function () { hideOverlay('dlgMask', 'dlgPanel', 'dialog-pop', 'dlgWrap'); }; }
+    if ($('dlgClose')) { $('dlgClose').onclick = function () { hideOverlay('dlgMask', 'dlgPanel', 'dialog-pop', 'dlgWrap'); }; }
     if ($('dlgOk')) {
       $('dlgOk').onclick = function () {
         hideOverlay('dlgMask', 'dlgPanel', 'dialog-pop', 'dlgWrap');
-        FxAnim.message({ type: 'success', text: '已确认放弃编辑' });
+        MVAnim.message({ type: 'success', text: '已确认放弃编辑' });
       };
     }
     if ($('drwOpen')) { $('drwOpen').onclick = function () { showOverlay('drwMask', 'drwPanel', 'drawer-right'); }; }
@@ -802,13 +924,14 @@
     var menu = $('menuPanel');
     if ($('menuToggle') && menu) {
       function closeMenu() {
-        if (!menu.hidden) { FxAnim.overlayLeave(menu, 'dropdown', function () { menu.hidden = true; }); }
+        if (!menu.hidden && !menu.__fxLeaving) { MVAnim.overlayLeave(menu, 'dropdown', function () { menu.hidden = true; }); }
       }
       $('menuToggle').onclick = function (e) {
         e.stopPropagation();
         if (menu.hidden) {
+          menu.__fxLeaving = false;
           menu.hidden = false;
-          FxAnim.overlayEnter(menu, 'dropdown');
+          MVAnim.overlayEnter(menu, 'dropdown');
         } else {
           closeMenu();
         }
@@ -824,10 +947,10 @@
         alertOpen = !alertOpen;
         if (alertOpen) {
           alertBody.style.display = 'block';
-          FxAnim.overlayEnter(alertBody, 'alert-expand');
-          FxAnim.overlayEnter(alertIcon, 'alert-icon-pop');
+          MVAnim.overlayEnter(alertBody, 'alert-expand');
+          MVAnim.overlayEnter(alertIcon, 'alert-icon-pop');
         } else {
-          FxAnim.overlayLeave(alertBody, 'alert-expand', function () { alertBody.style.display = 'none'; });
+          MVAnim.overlayLeave(alertBody, 'alert-expand', function () { alertBody.style.display = 'none'; });
         }
       };
     }

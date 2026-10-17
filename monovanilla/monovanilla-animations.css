@@ -1,5 +1,6 @@
 /*!
- * fuxsto-compat-animations.css  v1.0.0
+ * monovanilla-animations.css  v2.0.0
+ * 原名 fuxsto-animations.css, 2026-10-17 起项目更名 MonoVanilla (类前缀 mv-, 令牌 --mv-*)。
  * ------------------------------------------------------------------
  * 从 design.fuxsto.cn 抽取并「向下兼容改写」的动画包。
  *
@@ -21,8 +22,8 @@
  *   6. 尊重 prefers-reduced-motion
  *
  * 用法:
- *   <link rel="stylesheet" href="fuxsto-animations.css">
- *   <script src="fuxsto-anim.js"></script>   (折叠面板等需要)
+ *   <link rel="stylesheet" href="monovanilla-animations.css">
+ *   <script src="monovanilla-anim.js"></script>   (折叠面板等需要)
  * ------------------------------------------------------------------
  */
 
@@ -162,11 +163,11 @@
   to { -webkit-transform: translate(100%); transform: translate(100%); }
 }
 
-@-webkit-keyframes fuxstoTextShimmer {
+@-webkit-keyframes mvTextShimmer {
   0% { background-position: 100% 0; }
   to { background-position: -100% 0; }
 }
-@keyframes fuxstoTextShimmer {
+@keyframes mvTextShimmer {
   0% { background-position: 100% 0; }
   to { background-position: -100% 0; }
 }
@@ -195,24 +196,24 @@
 @-webkit-keyframes uploadBreath {
   0%, to {
     border-color: rgb(24, 24, 27);
-    border-color: var(--fx-ring, rgb(24, 24, 27));
+    border-color: var(--mv-ring, rgb(24, 24, 27));
     box-shadow: 0 0 rgba(24, 24, 27, 0);
   }
   50% {
     border-color: rgb(24, 24, 27);
-    border-color: var(--fx-ring, rgb(24, 24, 27));
+    border-color: var(--mv-ring, rgb(24, 24, 27));
     box-shadow: 0 0 0 6px rgba(24, 24, 27, .12);
   }
 }
 @keyframes uploadBreath {
   0%, to {
     border-color: rgb(24, 24, 27);
-    border-color: var(--fx-ring, rgb(24, 24, 27));
+    border-color: var(--mv-ring, rgb(24, 24, 27));
     box-shadow: 0 0 rgba(24, 24, 27, 0);
   }
   50% {
     border-color: rgb(24, 24, 27);
-    border-color: var(--fx-ring, rgb(24, 24, 27));
+    border-color: var(--mv-ring, rgb(24, 24, 27));
     box-shadow: 0 0 0 6px rgba(24, 24, 27, .12);
   }
 }
@@ -241,10 +242,10 @@
 /* 流光 / 骨架 */
 .animate-kinetic-shimmer { -webkit-animation: kineticShimmer 1.8s cubic-bezier(.85, 0, .15, 1) infinite; animation: kineticShimmer 1.8s cubic-bezier(.85, 0, .15, 1) infinite; }
 .animate-progress-stripe { -webkit-animation: progressStripe 1s linear infinite; animation: progressStripe 1s linear infinite; }
-.table-row-shimmer { -webkit-animation: fuxstoTextShimmer 1.4s ease-in-out infinite; animation: fuxstoTextShimmer 1.4s ease-in-out infinite; }
+.table-row-shimmer { -webkit-animation: mvTextShimmer 1.4s ease-in-out infinite; animation: mvTextShimmer 1.4s ease-in-out infinite; }
 
 /* 文字流光: -webkit-background-clip:text + -webkit-text-fill-color 在 Chrome 38 可用 */
-.fuxsto-text-shimmer {
+.mv-text-shimmer {
   -webkit-background-clip: text;
           background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -252,52 +253,52 @@
   background-image: -webkit-linear-gradient(left, rgba(128, 128, 128, .3) 0%, rgba(128, 128, 128, .7) 50%, rgba(128, 128, 128, .3) 100%);
   background-image: linear-gradient(90deg, rgba(128, 128, 128, .3) 0%, rgba(128, 128, 128, .7) 50%, rgba(128, 128, 128, .3) 100%);
   background-size: 200% 100%;
-  -webkit-animation: fuxstoTextShimmer 1.4s ease-in-out infinite;
-          animation: fuxstoTextShimmer 1.4s ease-in-out infinite;
+  -webkit-animation: mvTextShimmer 1.4s ease-in-out infinite;
+          animation: mvTextShimmer 1.4s ease-in-out infinite;
   -webkit-transition: color .4s ease, -webkit-text-fill-color .4s ease;
           transition: color .4s ease, -webkit-text-fill-color .4s ease;
 }
 
 /* 反馈 */
 .animate-shake { -webkit-animation: shake .3s cubic-bezier(.36, .07, .19, .97) both; animation: shake .3s cubic-bezier(.36, .07, .19, .97) both; }
-.upload-drag-active { border-color: rgb(24, 24, 27); border-color: var(--fx-ring, rgb(24, 24, 27)); -webkit-animation: uploadBreath 1.4s ease-in-out infinite; animation: uploadBreath 1.4s ease-in-out infinite; }
+.upload-drag-active { border-color: rgb(24, 24, 27); border-color: var(--mv-ring, rgb(24, 24, 27)); -webkit-animation: uploadBreath 1.4s ease-in-out infinite; animation: uploadBreath 1.4s ease-in-out infinite; }
 
 /* ============================================================
  * 3. 逐行错峰 (stagger) —— 用 nth-child, 无需 CSS 变量, Chrome 38 可用
- *    父元素加 .fx-stagger, 子元素自动递增延迟
+ *    父元素加 .mv-stagger, 子元素自动递增延迟
  * ============================================================ */
-.fx-stagger > *:nth-child(1)  { -webkit-animation-delay: 0s;    animation-delay: 0s; }
-.fx-stagger > *:nth-child(2)  { -webkit-animation-delay: .03s;  animation-delay: .03s; }
-.fx-stagger > *:nth-child(3)  { -webkit-animation-delay: .06s;  animation-delay: .06s; }
-.fx-stagger > *:nth-child(4)  { -webkit-animation-delay: .09s;  animation-delay: .09s; }
-.fx-stagger > *:nth-child(5)  { -webkit-animation-delay: .12s;  animation-delay: .12s; }
-.fx-stagger > *:nth-child(6)  { -webkit-animation-delay: .15s;  animation-delay: .15s; }
-.fx-stagger > *:nth-child(7)  { -webkit-animation-delay: .18s;  animation-delay: .18s; }
-.fx-stagger > *:nth-child(8)  { -webkit-animation-delay: .21s;  animation-delay: .21s; }
-.fx-stagger > *:nth-child(9)  { -webkit-animation-delay: .24s;  animation-delay: .24s; }
-.fx-stagger > *:nth-child(10) { -webkit-animation-delay: .27s;  animation-delay: .27s; }
-.fx-stagger > *:nth-child(11) { -webkit-animation-delay: .30s;  animation-delay: .30s; }
-.fx-stagger > *:nth-child(12) { -webkit-animation-delay: .33s;  animation-delay: .33s; }
-.fx-stagger > *:nth-child(13) { -webkit-animation-delay: .36s;  animation-delay: .36s; }
-.fx-stagger > *:nth-child(14) { -webkit-animation-delay: .39s;  animation-delay: .39s; }
-.fx-stagger > *:nth-child(15) { -webkit-animation-delay: .42s;  animation-delay: .42s; }
-.fx-stagger > *:nth-child(16) { -webkit-animation-delay: .45s;  animation-delay: .45s; }
+.mv-stagger > *:nth-child(1)  { -webkit-animation-delay: 0s;    animation-delay: 0s; }
+.mv-stagger > *:nth-child(2)  { -webkit-animation-delay: .03s;  animation-delay: .03s; }
+.mv-stagger > *:nth-child(3)  { -webkit-animation-delay: .06s;  animation-delay: .06s; }
+.mv-stagger > *:nth-child(4)  { -webkit-animation-delay: .09s;  animation-delay: .09s; }
+.mv-stagger > *:nth-child(5)  { -webkit-animation-delay: .12s;  animation-delay: .12s; }
+.mv-stagger > *:nth-child(6)  { -webkit-animation-delay: .15s;  animation-delay: .15s; }
+.mv-stagger > *:nth-child(7)  { -webkit-animation-delay: .18s;  animation-delay: .18s; }
+.mv-stagger > *:nth-child(8)  { -webkit-animation-delay: .21s;  animation-delay: .21s; }
+.mv-stagger > *:nth-child(9)  { -webkit-animation-delay: .24s;  animation-delay: .24s; }
+.mv-stagger > *:nth-child(10) { -webkit-animation-delay: .27s;  animation-delay: .27s; }
+.mv-stagger > *:nth-child(11) { -webkit-animation-delay: .30s;  animation-delay: .30s; }
+.mv-stagger > *:nth-child(12) { -webkit-animation-delay: .33s;  animation-delay: .33s; }
+.mv-stagger > *:nth-child(13) { -webkit-animation-delay: .36s;  animation-delay: .36s; }
+.mv-stagger > *:nth-child(14) { -webkit-animation-delay: .39s;  animation-delay: .39s; }
+.mv-stagger > *:nth-child(15) { -webkit-animation-delay: .42s;  animation-delay: .42s; }
+.mv-stagger > *:nth-child(16) { -webkit-animation-delay: .45s;  animation-delay: .45s; }
 
 /* 手动延迟工具类 (超出 nth-child 上限或动态列表用, 也可由 JS 写内联 animation-delay) */
-.fx-delay-1 { -webkit-animation-delay: .03s; animation-delay: .03s; }
-.fx-delay-2 { -webkit-animation-delay: .06s; animation-delay: .06s; }
-.fx-delay-3 { -webkit-animation-delay: .09s; animation-delay: .09s; }
-.fx-delay-4 { -webkit-animation-delay: .12s; animation-delay: .12s; }
-.fx-delay-5 { -webkit-animation-delay: .15s; animation-delay: .15s; }
-.fx-delay-6 { -webkit-animation-delay: .18s; animation-delay: .18s; }
-.fx-delay-7 { -webkit-animation-delay: .21s; animation-delay: .21s; }
-.fx-delay-8 { -webkit-animation-delay: .24s; animation-delay: .24s; }
+.mv-delay-1 { -webkit-animation-delay: .03s; animation-delay: .03s; }
+.mv-delay-2 { -webkit-animation-delay: .06s; animation-delay: .06s; }
+.mv-delay-3 { -webkit-animation-delay: .09s; animation-delay: .09s; }
+.mv-delay-4 { -webkit-animation-delay: .12s; animation-delay: .12s; }
+.mv-delay-5 { -webkit-animation-delay: .15s; animation-delay: .15s; }
+.mv-delay-6 { -webkit-animation-delay: .18s; animation-delay: .18s; }
+.mv-delay-7 { -webkit-animation-delay: .21s; animation-delay: .21s; }
+.mv-delay-8 { -webkit-animation-delay: .24s; animation-delay: .24s; }
 
 /* ============================================================
- * 4. 折叠面板辅助 (配合 fuxsto-anim.js 的 expand/collapse)
+ * 4. 折叠面板辅助 (配合 monovanilla-anim.js 的 expand/collapse)
  * ============================================================ */
-.fx-collapse { height: 0; overflow: hidden; }
-.fx-collapsible { overflow: hidden; }
+.mv-collapse { height: 0; overflow: hidden; }
+.mv-collapsible { overflow: hidden; }
 
 /* ============================================================
  * 4b. 入场动效 (transition-based)
@@ -306,7 +307,7 @@
  *     这是组件库默认的「入场动效」(animate 属性), 覆盖全站组件。
  *     blur 补 -webkit- 前缀; 老浏览器忽略 blur 仍保留淡入+位移。
  * ============================================================ */
-.fx-enter {
+.mv-enter {
   opacity: 0;
   pointer-events: none;
   -webkit-transform: translateY(6px) scale(.98);
@@ -320,7 +321,7 @@
                       transform .7s cubic-bezier(.16, 1, .3, 1),
                       filter .7s cubic-bezier(.16, 1, .3, 1);
 }
-.fx-enter-active {
+.mv-enter-active {
   opacity: 1;
   pointer-events: auto;
   -webkit-transform: translateY(0) scale(1);
@@ -329,7 +330,7 @@
           filter: blur(0);
 }
 /* 无模糊的轻量变体 (极老浏览器或性能敏感场景) */
-.fx-enter-lite {
+.mv-enter-lite {
   opacity: 0;
   pointer-events: none;
   -webkit-transform: translateY(6px);
@@ -339,37 +340,37 @@
           transition: opacity .7s cubic-bezier(.16, 1, .3, 1),
                       transform .7s cubic-bezier(.16, 1, .3, 1);
 }
-.fx-enter-lite.fx-enter-active {
+.mv-enter-lite.mv-enter-active {
   opacity: 1;
   pointer-events: auto;
   -webkit-transform: translateY(0);
           transform: translateY(0);
 }
-.fx-enter-delay-1 { -webkit-transition-delay: .05s; transition-delay: .05s; }
-.fx-enter-delay-2 { -webkit-transition-delay: .1s;  transition-delay: .1s; }
-.fx-enter-delay-3 { -webkit-transition-delay: .15s; transition-delay: .15s; }
-.fx-enter-delay-4 { -webkit-transition-delay: .2s;  transition-delay: .2s; }
-.fx-enter-delay-5 { -webkit-transition-delay: .3s;  transition-delay: .3s; }
-.fx-enter-delay-6 { -webkit-transition-delay: .4s;  transition-delay: .4s; }
+.mv-enter-delay-1 { -webkit-transition-delay: .05s; transition-delay: .05s; }
+.mv-enter-delay-2 { -webkit-transition-delay: .1s;  transition-delay: .1s; }
+.mv-enter-delay-3 { -webkit-transition-delay: .15s; transition-delay: .15s; }
+.mv-enter-delay-4 { -webkit-transition-delay: .2s;  transition-delay: .2s; }
+.mv-enter-delay-5 { -webkit-transition-delay: .3s;  transition-delay: .3s; }
+.mv-enter-delay-6 { -webkit-transition-delay: .4s;  transition-delay: .4s; }
 
 /* ============================================================
  * 4c. 交互过渡 (按钮 press / 卡片 lift, 原 playground 交互反馈)
  * ============================================================ */
-.fx-press {
+.mv-press {
   -webkit-transition: -webkit-transform .15s cubic-bezier(.4, 0, .2, 1);
           transition: transform .15s cubic-bezier(.4, 0, .2, 1);
 }
-.fx-press:active {
+.mv-press:active {
   -webkit-transform: scale(.97);
           transform: scale(.97);
 }
-.fx-lift {
+.mv-lift {
   -webkit-transition: -webkit-transform .2s cubic-bezier(.16, 1, .3, 1), box-shadow .2s ease;
           transition: transform .2s cubic-bezier(.16, 1, .3, 1), box-shadow .2s ease;
 }
 /* 悬停态仅在支持真实悬停的设备生效, 避免触屏 sticky hover */
 @media (hover: hover) {
-  .fx-lift:hover {
+  .mv-lift:hover {
     -webkit-transform: translateY(-2px);
             transform: translateY(-2px);
     box-shadow: 0 10px 24px rgba(0, 0, 0, .12);
@@ -380,20 +381,20 @@
  * 4d. 滑块 / 指示条 / 揭示 (Carousel、Tabs 指示条、StreamingText)
  * ============================================================ */
 /* Tabs 指示条: left/width 过渡 (280ms ease-smooth) */
-.fx-indicator {
+.mv-indicator {
   -webkit-transition: left .28s cubic-bezier(.25, 1, .5, 1), width .28s cubic-bezier(.25, 1, .5, 1);
           transition: left .28s cubic-bezier(.25, 1, .5, 1), width .28s cubic-bezier(.25, 1, .5, 1);
 }
 /* Carousel 轨道: translateX 过渡 (500ms ease-swift) */
-.fx-slide-track {
+.mv-slide-track {
   -webkit-transition: -webkit-transform .5s cubic-bezier(.16, 1, .3, 1);
           transition: transform .5s cubic-bezier(.16, 1, .3, 1);
 }
 /* Carousel 淡入淡出效果 */
-.fx-fade-item { opacity: 0; -webkit-transition: opacity .4s ease; transition: opacity .4s ease; }
-.fx-fade-item.fx-fade-on { opacity: 1; }
+.mv-fade-item { opacity: 0; -webkit-transition: opacity .4s ease; transition: opacity .4s ease; }
+.mv-fade-item.mv-fade-on { opacity: 1; }
 /* 高度/透明度揭示: max-height 过渡 (StreamingText 展开、面板显示) */
-.fx-reveal {
+.mv-reveal {
   max-height: 0;
   opacity: 0;
   overflow: hidden;
@@ -402,7 +403,7 @@
   -webkit-transition: max-height .3s cubic-bezier(.25, 1, .5, 1), opacity .3s ease, -webkit-transform .3s ease;
           transition: max-height .3s cubic-bezier(.25, 1, .5, 1), opacity .3s ease, transform .3s ease;
 }
-.fx-reveal.fx-reveal-open {
+.mv-reveal.mv-reveal-open {
   max-height: 500px;
   opacity: 1;
   -webkit-transform: translateY(0);
@@ -447,7 +448,7 @@
     -webkit-animation-duration: var(--duration-slow, .3s);
             animation-duration: var(--duration-slow, .3s);
   }
-  .fuxsto-text-shimmer {
+  .mv-text-shimmer {
     -webkit-transition: color var(--duration-slower, .4s) ease, -webkit-text-fill-color var(--duration-slower, .4s) ease;
             transition: color var(--duration-slower, .4s) ease, -webkit-text-fill-color var(--duration-slower, .4s) ease;
   }
@@ -459,8 +460,8 @@
  *    用 Vue Transition 驱动 CSS 过渡, 类名形如 xxx-enter-from /
  *    xxx-enter-active / xxx-leave-to / xxx-leave-active / xxx-move。
  *    这里按原站数值 1:1 复刻, 并加 -webkit- 前缀 (Chrome 38 的
- *    filter / transform 需前缀)。配合 fuxsto-anim.js 的
- *    FxAnim.overlayEnter / overlayLeave / message / notification 使用。
+ *    filter / transform 需前缀)。配合 monovanilla-anim.js 的
+ *    MVAnim.overlayEnter / overlayLeave / message / notification 使用。
  *    时长 .4s = 原站 --duration-slower, 缓动 = 原站 --ease-swift。
  * ============================================================ */
 
@@ -637,7 +638,7 @@
   -webkit-transform: scale(.4); transform: scale(.4);
 }
 
-/* ---- BackTop 淡入淡出 + 模糊 (与 FxAnim.fadeBlur 等价, 类名对齐原站) ---- */
+/* ---- BackTop 淡入淡出 + 模糊 (与 MVAnim.fadeBlur 等价, 类名对齐原站) ---- */
 .backtop-fade-enter-active,
 .backtop-fade-leave-active {
   -webkit-transition: opacity .4s cubic-bezier(.16, 1, .3, 1), -webkit-filter .4s cubic-bezier(.16, 1, .3, 1);
@@ -650,48 +651,137 @@
 }
 
 /* ============================================================
- * 7. Message / Notification 卡片样式 (imperative API 配套)
- *    颜色用「字面量 + var() 兜底」双声明: 接了主题令牌的项目
- *    自动换肤, 没接的项目退回浅色字面量, Chrome 38 只用字面量。
+ * 7. Message / Notification 卡片样式 (数值对齐原站)
+ *    Message:  顶部居中 24px, 12/16px 内边距, 8px 圆角,
+ *              0 8px 30px rgba(0,0,0,.08), 16px 图标, 14px/600/1 行高;
+ *    Notif:    360px 宽, 14px 内边距, 18px 图标,
+ *              13px/700 标题 + 12px/1.625 正文, 双层阴影。
+ *    颜色走 --mv-* 令牌 + 字面量兜底; 老浏览器用 margin 代替 flex gap。
  * ============================================================ */
-.fx-message-stack {
-  position: fixed; top: 16px; left: 50%; z-index: 1000;
-  -webkit-transform: translateX(-50%); transform: translateX(-50%);
-  width: 340px; pointer-events: none;
+.mv-message-stack {
+  position: fixed; top: 24px; left: 0; right: 0; z-index: 99999;
+  display: -webkit-box; display: -webkit-flex; display: flex;
+  -webkit-box-orient: vertical; -webkit-flex-direction: column; flex-direction: column;
+  -webkit-box-align: center; -webkit-align-items: center; align-items: center;
+  padding: 0 16px; pointer-events: none;
 }
-.fx-message {
+.mv-message {
   pointer-events: auto;
   display: -webkit-box; display: -webkit-flex; display: flex;
-  -webkit-align-items: center; align-items: center;
-  padding: 10px 14px; margin: 0 0 8px; border-radius: 8px; font-size: 13px;
-  background: #fff; background: var(--fx-card, #fff);
-  color: #18181b; color: var(--fx-fg, #18181b);
-  border: 1px solid #e4e4e7; border-color: var(--fx-card-bd, #e4e4e7);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, .08);
+  -webkit-box-align: center; -webkit-align-items: center; align-items: center;
+  max-width: 576px; padding: 12px 16px; margin: 0 0 12px;
+  border: 1px solid #e4e4e7; border-color: var(--mv-card-bd, #e4e4e7);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .6);
+  background: var(--mv-msg-bg, rgba(255, 255, 255, .6));
+  color: #09090b; color: var(--mv-fg, #09090b);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .08);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  font-size: 14px; font-weight: 600; line-height: 1; letter-spacing: -.025em;
 }
-.fx-msg-dot { width: 8px; height: 8px; min-width: 8px; border-radius: 50%; margin: 0 8px 0 0; background: #3b82f6; }
-.fx-message[data-type="success"] .fx-msg-dot { background: #10b981; }
-.fx-message[data-type="error"]   .fx-msg-dot { background: #ef4444; }
-.fx-message[data-type="warning"] .fx-msg-dot { background: #f59e0b; }
-.fx-message[data-type="info"]    .fx-msg-dot { background: #3b82f6; }
-.fx-msg-text { -webkit-box-flex: 1; -webkit-flex: 1; flex: 1; margin: 0 8px 0 0; }
-.fx-msg-close {
-  border: 0; background: transparent; cursor: pointer; padding: 2px;
-  font-size: 14px; line-height: 1; color: #a1a1aa; color: var(--fx-faint, #a1a1aa);
+.mv-message:last-child { margin-bottom: 0; }
+.mv-message[data-type="success"] {
+  border-color: rgba(16, 185, 129, .5); border-color: var(--mv-success-50, rgba(16, 185, 129, .5));
+  color: #10b981; color: var(--mv-success, #10b981);
+}
+.mv-message[data-type="error"] {
+  border-color: rgba(239, 68, 68, .5); border-color: var(--mv-destructive-50, rgba(239, 68, 68, .5));
+  color: #ef4444; color: var(--mv-destructive, #ef4444);
+}
+.mv-message[data-type="warning"] {
+  border-color: rgba(245, 158, 11, .5); border-color: var(--mv-warning-50, rgba(245, 158, 11, .5));
+  color: #f59e0b; color: var(--mv-warning, #f59e0b);
+}
+.mv-msg-icon {
+  display: block; width: 16px; height: 16px; margin-right: 12px;
+  -webkit-flex-shrink: 0; flex-shrink: 0;
+}
+.mv-msg-text { -webkit-box-flex: 1; -webkit-flex: 1; flex: 1; }
+.mv-msg-close {
+  display: -webkit-box; display: -webkit-flex; display: flex;
+  -webkit-box-align: center; -webkit-align-items: center; align-items: center;
+  margin-left: 8px; padding: 2px; border: 0; border-radius: 4px;
+  background: transparent; color: inherit; opacity: .6; cursor: pointer;
+  -webkit-transition: background-color .2s; transition: background-color .2s;
+}
+.mv-msg-close svg { display: block; width: 14px; height: 14px; }
+.mv-msg-close:active { -webkit-transform: scale(.9); transform: scale(.9); }
+@media (hover: hover) {
+  .mv-msg-close:hover { background: #f4f4f5; background: var(--mv-secondary, #f4f4f5); }
 }
 
-.fx-notif-stack { position: fixed; z-index: 1000; width: 340px; pointer-events: none; }
-.fx-notif-stack[data-side="right"]  { top: 16px; right: 16px; }
-.fx-notif-stack[data-side="left"]   { top: 16px; left: 16px; }
-.fx-notif-stack[data-side="top"]    { top: 16px; left: 50%; -webkit-transform: translateX(-50%); transform: translateX(-50%); }
-.fx-notif-stack[data-side="bottom"] { bottom: 16px; left: 50%; -webkit-transform: translateX(-50%); transform: translateX(-50%); }
-.fx-notif {
-  pointer-events: auto;
-  padding: 12px 14px; margin: 0 0 8px; border-radius: 10px; font-size: 13px;
-  background: #fff; background: var(--fx-card, #fff);
-  color: #18181b; color: var(--fx-fg, #18181b);
-  border: 1px solid #e4e4e7; border-color: var(--fx-card-bd, #e4e4e7);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, .12);
+.mv-notif-stack {
+  position: fixed; z-index: 99999; pointer-events: none;
+  display: -webkit-box; display: -webkit-flex; display: flex;
+  -webkit-box-orient: vertical; -webkit-flex-direction: column; flex-direction: column;
+  width: 100%; max-width: calc(100vw - 32px);
 }
-.fx-notif-title { font-weight: 600; margin: 0 0 2px; }
-.fx-notif-text { font-size: 12px; color: #71717a; color: var(--fx-muted, #71717a); }
+.mv-notif-stack[data-side="right"] {
+  top: 24px; left: 50%; -webkit-transform: translateX(-50%); transform: translateX(-50%);
+  -webkit-box-align: end; -webkit-align-items: flex-end; align-items: flex-end;
+}
+.mv-notif-stack[data-side="left"] {
+  top: 24px; left: 50%; -webkit-transform: translateX(-50%); transform: translateX(-50%);
+  -webkit-box-align: start; -webkit-align-items: flex-start; align-items: flex-start;
+}
+.mv-notif-stack[data-side="bottom"] {
+  bottom: 24px; left: 50%; -webkit-transform: translateX(-50%); transform: translateX(-50%);
+  -webkit-box-align: end; -webkit-align-items: flex-end; align-items: flex-end;
+}
+.mv-notif-stack[data-side="top"] {
+  top: 24px; left: 50%; -webkit-transform: translateX(-50%); transform: translateX(-50%);
+  -webkit-box-align: center; -webkit-align-items: center; align-items: center;
+}
+@media (min-width: 640px) {
+  .mv-notif-stack { max-width: 360px; }
+  .mv-notif-stack[data-side="right"]  { left: auto; right: 24px; -webkit-transform: none; transform: none; }
+  .mv-notif-stack[data-side="left"]   { left: 24px; right: auto; -webkit-transform: none; transform: none; }
+  .mv-notif-stack[data-side="bottom"] { left: auto; right: 24px; -webkit-transform: none; transform: none; }
+}
+.mv-notif {
+  pointer-events: auto; position: relative; width: 100%;
+  margin: 0 0 12px; overflow: hidden;
+  border: 1px solid #e4e4e7; border-color: var(--mv-card-bd, #e4e4e7);
+  border-radius: 8px;
+  background: #ffffff; background: var(--mv-surface, #ffffff);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .06), 0 1px 3px rgba(0, 0, 0, .03);
+}
+.mv-notif:last-child { margin-bottom: 0; }
+.mv-notif-row {
+  display: -webkit-box; display: -webkit-flex; display: flex;
+  -webkit-box-align: start; -webkit-align-items: flex-start; align-items: flex-start;
+  padding: 14px;
+}
+.mv-notif-iconwrap {
+  position: relative; margin: 2px 12px 0 0;
+  -webkit-flex-shrink: 0; flex-shrink: 0;
+}
+.mv-notif-icon { display: block; width: 18px; height: 18px; color: #18181b; color: var(--mv-primary, #18181b); }
+.mv-notif[data-type="success"] .mv-notif-icon { color: #10b981; color: var(--mv-success, #10b981); }
+.mv-notif[data-type="warning"] .mv-notif-icon { color: #f59e0b; color: var(--mv-warning, #f59e0b); }
+.mv-notif[data-type="error"]   .mv-notif-icon { color: #ef4444; color: var(--mv-destructive, #ef4444); }
+.mv-notif-body {
+  -webkit-box-flex: 1; -webkit-flex: 1 1 auto; flex: 1 1 auto;
+  min-width: 0; overflow: hidden;
+}
+.mv-notif-title {
+  margin: 1px 0 0; font-size: 13px; font-weight: 700; line-height: 1.25;
+  letter-spacing: -.025em; color: #09090b; color: var(--mv-fg, #09090b);
+}
+.mv-notif-text {
+  margin: 4px 0 0; font-size: 12px; line-height: 1.625; color: #71717a;
+  color: var(--mv-muted, #71717a); word-wrap: break-word; white-space: pre-wrap;
+}
+.mv-notif-close {
+  display: -webkit-box; display: -webkit-flex; display: flex;
+  -webkit-box-align: center; -webkit-align-items: center; align-items: center;
+  margin-left: 4px; padding: 4px; border: 0; border-radius: 4px;
+  background: transparent; color: #71717a; color: var(--mv-muted, #71717a);
+  cursor: pointer; -webkit-flex-shrink: 0; flex-shrink: 0;
+  -webkit-transition: background-color .2s; transition: background-color .2s;
+}
+.mv-notif-close svg { display: block; width: 14px; height: 14px; opacity: .6; }
+.mv-notif-close:active { -webkit-transform: scale(.9); transform: scale(.9); }
+@media (hover: hover) {
+  .mv-notif-close:hover { background: #f4f4f5; background: var(--mv-secondary, #f4f4f5); }
+}
