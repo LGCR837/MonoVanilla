@@ -637,47 +637,86 @@
 .mv-notif {
   pointer-events: auto; position: relative; width: 100%;
   margin: 0 0 12px; overflow: hidden;
-  border: 1px solid #e4e4e7; border-color: var(--mv-card-bd, #e4e4e7);
-  border-radius: 8px;
-  background: #ffffff; background: var(--mv-surface, #ffffff);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, .06), 0 1px 3px rgba(0, 0, 0, .03);
+  border: 1px solid rgba(228, 228, 231, .8); border-color: var(--mv-card-bd, #e4e4e7);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, .96); background: var(--mv-surface-95, rgba(255, 255, 255, .96));
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 16px 36px -18px rgba(0, 0, 0, .5);
+  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
 }
 .mv-notif:last-child { margin-bottom: 0; }
+.mv-notif[data-type="success"] { border-color: rgba(16, 185, 129, .5); border-color: var(--mv-success-50, rgba(16, 185, 129, .5)); }
+.mv-notif[data-type="warning"] { border-color: rgba(245, 158, 11, .5); border-color: var(--mv-warning-50, rgba(245, 158, 11, .5)); }
+.mv-notif[data-type="error"] { border-color: rgba(239, 68, 68, .5); border-color: var(--mv-destructive-50, rgba(239, 68, 68, .5)); }
 .mv-notif-row {
   display: -webkit-box; display: -webkit-flex; display: flex;
   -webkit-box-align: start; -webkit-align-items: flex-start; align-items: flex-start;
-  padding: 14px;
+  padding: 12px 12px 14px;
 }
 .mv-notif-iconwrap {
-  position: relative; margin: 2px 12px 0 0;
+  position: relative; width: 28px; height: 28px; min-width: 28px; margin: 0 12px 0 0;
+  display: -webkit-box; display: -webkit-flex; display: flex;
+  -webkit-box-align: center; -webkit-align-items: center; align-items: center;
+  -webkit-box-pack: center; -webkit-justify-content: center; justify-content: center;
+  border-radius: 8px; background: #f4f4f5; background: var(--mv-soft, #f4f4f5);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .06);
   -webkit-flex-shrink: 0; flex-shrink: 0;
 }
-.mv-notif-icon { display: block; width: 18px; height: 18px; color: #18181b; color: var(--mv-primary, #18181b); }
+.mv-notif-icon { display: block; width: 16px; height: 16px; color: #18181b; color: var(--mv-primary, #18181b); }
+.mv-notif[data-type="success"] .mv-notif-iconwrap { background: rgba(16, 185, 129, .14); }
 .mv-notif[data-type="success"] .mv-notif-icon { color: #10b981; color: var(--mv-success, #10b981); }
+.mv-notif[data-type="warning"] .mv-notif-iconwrap { background: rgba(245, 158, 11, .16); }
 .mv-notif[data-type="warning"] .mv-notif-icon { color: #f59e0b; color: var(--mv-warning, #f59e0b); }
-.mv-notif[data-type="error"]   .mv-notif-icon { color: #ef4444; color: var(--mv-destructive, #ef4444); }
+.mv-notif[data-type="error"] .mv-notif-iconwrap { background: rgba(239, 68, 68, .14); }
+.mv-notif[data-type="error"] .mv-notif-icon { color: #ef4444; color: var(--mv-destructive, #ef4444); }
 .mv-notif-body {
   -webkit-box-flex: 1; -webkit-flex: 1 1 auto; flex: 1 1 auto;
   min-width: 0; overflow: hidden;
 }
 .mv-notif-title {
-  margin: 1px 0 0; font-size: 13px; font-weight: 700; line-height: 1.25;
-  letter-spacing: -.025em; color: #09090b; color: var(--mv-fg, #09090b);
+  margin: 2px 0 0; font-size: 13px; font-weight: 600; line-height: 1.3;
+  color: #09090b; color: var(--mv-fg, #09090b);
 }
 .mv-notif-text {
-  margin: 4px 0 0; font-size: 12px; line-height: 1.625; color: #71717a;
+  margin: 3px 0 0; font-size: 12px; line-height: 1.55; color: #71717a;
   color: var(--mv-muted, #71717a); word-wrap: break-word; white-space: pre-wrap;
 }
 .mv-notif-close {
   display: -webkit-box; display: -webkit-flex; display: flex;
   -webkit-box-align: center; -webkit-align-items: center; align-items: center;
-  margin-left: 4px; padding: 4px; border: 0; border-radius: 4px;
-  background: transparent; color: #71717a; color: var(--mv-muted, #71717a);
+  -webkit-box-pack: center; -webkit-justify-content: center; justify-content: center;
+  width: 28px; height: 28px; min-width: 28px; margin-left: 4px; padding: 0;
+  border: 0; border-radius: 8px; background: transparent;
+  color: #71717a; color: var(--mv-muted, #71717a);
   cursor: pointer; -webkit-flex-shrink: 0; flex-shrink: 0;
-  -webkit-transition: background-color .2s; transition: background-color .2s;
+  -webkit-transition: background-color .2s, color .2s; transition: background-color .2s, color .2s;
 }
-.mv-notif-close svg { display: block; width: 14px; height: 14px; opacity: .6; }
+.mv-notif-close svg { display: block; width: 15px; height: 15px; opacity: .7; }
 .mv-notif-close:active { -webkit-transform: scale(.9); transform: scale(.9); }
 @media (hover: hover) {
-  .mv-notif-close:hover { background: #f4f4f5; background: var(--mv-secondary, #f4f4f5); }
+  .mv-notif-close:hover { background: #f4f4f5; background: var(--mv-soft, #f4f4f5); color: #18181b; color: var(--mv-fg, #18181b); }
+}
+.mv-notif-timer {
+  position: absolute; left: 12px; right: 12px; bottom: 5px; height: 3px;
+  overflow: hidden; border-radius: 999px; background: rgba(228, 228, 231, .5);
+}
+.mv-notif-timer-bar {
+  display: block; width: 100%; height: 100%; border-radius: 999px;
+  background: #a1a1aa; background: var(--mv-muted, #a1a1aa);
+  box-shadow: 0 0 5px rgba(161, 161, 170, .5);
+  -webkit-transform-origin: left center; transform-origin: left center;
+  -webkit-animation-name: mv-notif-timer; animation-name: mv-notif-timer;
+  -webkit-animation-timing-function: linear; animation-timing-function: linear;
+  -webkit-animation-fill-mode: forwards; animation-fill-mode: forwards;
+  -webkit-animation-duration: 5000ms; animation-duration: 5000ms;
+}
+.mv-notif[data-type="success"] .mv-notif-timer-bar { background: #10b981; background: var(--mv-success, #10b981); box-shadow: 0 0 5px rgba(16, 185, 129, .5); }
+.mv-notif[data-type="warning"] .mv-notif-timer-bar { background: #f59e0b; background: var(--mv-warning, #f59e0b); box-shadow: 0 0 5px rgba(245, 158, 11, .5); }
+.mv-notif[data-type="error"] .mv-notif-timer-bar { background: #ef4444; background: var(--mv-destructive, #ef4444); box-shadow: 0 0 5px rgba(239, 68, 68, .5); }
+@-webkit-keyframes mv-notif-timer {
+  from { -webkit-transform: scaleX(1); transform: scaleX(1); }
+  to { -webkit-transform: scaleX(0); transform: scaleX(0); }
+}
+@keyframes mv-notif-timer {
+  from { -webkit-transform: scaleX(1); transform: scaleX(1); }
+  to { -webkit-transform: scaleX(0); transform: scaleX(0); }
 }

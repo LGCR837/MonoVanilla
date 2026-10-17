@@ -42,6 +42,7 @@
     --mv-mask-bg: rgba(255, 255, 255, .6);  /* 对话框遮罩 */
     --mv-radius: 8px;           /* 圆角基准 8px */
     --mv-surface: #ffffff;      /* 浮层 / 通知卡片面 */
+    --mv-surface-95: rgba(255, 255, 255, .96);
     --mv-muted-20: rgba(244, 244, 245, .2);  /* 对话框底栏 */
     --mv-border-40: rgba(228, 228, 231, .4);
     --mv-destructive-50: rgba(239, 68, 68, .5);
@@ -79,6 +80,7 @@
     --mv-msg-bg: rgba(0, 0, 0, .8);
     --mv-mask-bg: rgba(0, 0, 0, .4);
     --mv-surface: #000000;
+    --mv-surface-95: rgba(9, 9, 11, .96);
     --mv-muted-20: rgba(39, 39, 42, .2);
     --mv-border-40: rgba(39, 39, 42, .4);
     --mv-destructive-50: rgba(127, 29, 29, .5);
@@ -118,6 +120,7 @@
     --mv-msg-bg: rgba(0, 0, 0, .8);
     --mv-mask-bg: rgba(0, 0, 0, .4);
     --mv-surface: #000000;
+    --mv-surface-95: rgba(9, 9, 11, .96);
     --mv-muted-20: rgba(39, 39, 42, .2);
     --mv-border-40: rgba(39, 39, 42, .4);
     --mv-destructive-50: rgba(127, 29, 29, .5);
@@ -580,7 +583,7 @@
        <button class="btn" id="notifBottom">底部通知</button>
        <button class="btn" id="notifCloseAll">全部关闭</button>
      </div>
-     <p class="note">Message / Notification 是命令式 API（无组件，只有函数）。用 MVAnim.message() / MVAnim.notification() 实现：堆叠、自动消失、FLIP 位移动画。</p>
+     <p class="note">Message / Notification 是命令式 API。MVAnim.notification() 生成玻璃拟态卡片：半透明面 + 背景模糊、按色调描边与图标、底部一条随自动消失而收缩的倒计时条；堆叠时兄弟项 FLIP 平滑位移。</p>
    </div>
 
    <!-- 11. 浮层: 对话框 / 抽屉 / 菜单 / 告警 -->
@@ -893,9 +896,9 @@
     if ($('msgWarn')) { $('msgWarn').onclick = function () { MVAnim.message({ type: 'warning', text: '该地址不支持货到付款' }); }; }
     if ($('msgInfo')) { $('msgInfo').onclick = function () { MVAnim.message({ type: 'info', text: '正在为你重新计算运费' }); }; }
     if ($('msgSticky')) { $('msgSticky').onclick = function () { MVAnim.message({ type: 'info', text: '这条要手动关', duration: 0, closable: true }); }; }
-    if ($('notifRight')) { $('notifRight').onclick = function () { MVAnim.notification({ side: 'right', title: '部署完成', text: 'v0.1.1 已发布到生产环境。', closable: true }); }; }
-    if ($('notifLeft')) { $('notifLeft').onclick = function () { MVAnim.notification({ side: 'left', title: '换个位置', text: 'placement: top-left' }); }; }
-    if ($('notifBottom')) { $('notifBottom').onclick = function () { MVAnim.notification({ side: 'bottom', title: '证书即将过期', text: '还有 7 天。', duration: 0, closable: true }); }; }
+    if ($('notifRight')) { $('notifRight').onclick = function () { MVAnim.notification({ side: 'right', type: 'success', title: '部署完成', text: 'v0.1.1 已发布到生产环境。', closable: true }); }; }
+    if ($('notifLeft')) { $('notifLeft').onclick = function () { MVAnim.notification({ side: 'left', type: 'warning', title: '换个位置', text: 'placement: top-left' }); }; }
+    if ($('notifBottom')) { $('notifBottom').onclick = function () { MVAnim.notification({ side: 'bottom', type: 'error', title: '证书即将过期', text: '还有 7 天。', duration: 0, closable: true }); }; }
     if ($('notifCloseAll')) { $('notifCloseAll').onclick = function () { MVAnim.closeAllMessages(); MVAnim.closeAllNotifs(); }; }
   })();
 

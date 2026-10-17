@@ -752,7 +752,7 @@
     var type = opts.type || 'info';
     var title = opts.title || '';
     var text = opts.text != null ? opts.text : (opts.message || '');
-    var duration = opts.duration == null ? 4000 : opts.duration;
+    var duration = opts.duration == null ? 5000 : opts.duration;
     var stack = _ensureNotifStack(side);
     var el = document.createElement('div');
     el.className = 'mv-notif';
@@ -796,7 +796,16 @@
       row.appendChild(cb);
     }
     el.appendChild(row);
-
+    if (duration > 0 && !reduced()) {
+      var timer = document.createElement('div');
+      timer.className = 'mv-notif-timer';
+      var bar = document.createElement('span');
+      bar.className = 'mv-notif-timer-bar';
+      bar.style.webkitAnimationDuration = duration + 'ms';
+      bar.style.animationDuration = duration + 'ms';
+      timer.appendChild(bar);
+      el.appendChild(timer);
+    }
     var preN = _flipPre(stack);
     stack.appendChild(el);
     _flipPost(stack, 'notif-flip-' + side, preN);
