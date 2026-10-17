@@ -40,7 +40,7 @@
     --mv-secondary-fg: #18181b;
     --mv-msg-bg: rgba(255, 255, 255, .6);   /* message 半透明底 */
     --mv-mask-bg: rgba(255, 255, 255, .6);  /* 对话框遮罩 */
-    --mv-radius: 8px;           /* 原站 --radius: .5rem */
+    --mv-radius: 8px;           /* 圆角基准 8px */
     --mv-surface: #ffffff;      /* 浮层 / 通知卡片面 */
     --mv-muted-20: rgba(244, 244, 245, .2);  /* 对话框底栏 */
     --mv-border-40: rgba(228, 228, 231, .4);
@@ -260,7 +260,7 @@
     -webkit-box-pack: center; -webkit-justify-content: center; justify-content: center;
     padding: 16px; overflow-y: auto; pointer-events: none;
   }
-  /* 原站: max-w-md(448px) + 8px 圆角 + 0 20px 50px rgba(0,0,0,.2) */
+  /* 对话框尺寸基准: 宽 448px + 8px 圆角 + 0 20px 50px rgba(0,0,0,.2) 阴影 */
   .mv-dialog {
     pointer-events: auto; position: relative; width: 100%; max-width: 448px;
     display: -webkit-box; display: -webkit-flex; display: flex;
@@ -401,8 +401,8 @@
 
   <h1>MonoVanilla 兼容动画包 · 演示</h1>
   <p class="lead">
-    从 <code>design.fuxsto.cn</code> 抽取并向下兼容改写。目标：Chrome 38 可运行 / Chrome 49 完整。
-    可用老浏览器直接打开本页验证效果。
+    MonoVanilla 是一套纯 CSS + ES5 的兼容动画包，无构建、无框架、无依赖。
+    目标：Chrome 38 可运行 / Chrome 49 完整。可用老浏览器直接打开本页验证效果。
   </p>
 
   <!-- 1. 入场揭示 -->
@@ -462,7 +462,7 @@
         <div class="cal-grid" id="calGrid"></div>
       </div>
     </div>
-    <p class="note">原站 rotateX 未配 perspective，为忠实还原保留纵向压平效果。</p>
+    <p class="note">日历 rotateX 未配 perspective，保留纵向压平效果。</p>
   </div>
 
   <!-- 4. 流光 / 骨架 -->
@@ -580,7 +580,7 @@
        <button class="btn" id="notifBottom">底部通知</button>
        <button class="btn" id="notifCloseAll">全部关闭</button>
      </div>
-     <p class="note">原站 Message / Notification 是命令式 API（无组件, 只有函数）。这里用 MVAnim.message() / MVAnim.notification() 原生复刻：堆叠、自动消失、FLIP 位移动画, 过渡类名与原站 Vue &lt;Transition&gt; 钩子一一对应。</p>
+     <p class="note">Message / Notification 是命令式 API（无组件，只有函数）。用 MVAnim.message() / MVAnim.notification() 实现：堆叠、自动消失、FLIP 位移动画。</p>
    </div>
 
    <!-- 11. 浮层: 对话框 / 抽屉 / 菜单 / 告警 -->
@@ -924,12 +924,12 @@
     var menu = $('menuPanel');
     if ($('menuToggle') && menu) {
       function closeMenu() {
-        if (!menu.hidden && !menu.__fxLeaving) { MVAnim.overlayLeave(menu, 'dropdown', function () { menu.hidden = true; }); }
+        if (!menu.hidden && !menu.__mvLeaving) { MVAnim.overlayLeave(menu, 'dropdown', function () { menu.hidden = true; }); }
       }
       $('menuToggle').onclick = function (e) {
         e.stopPropagation();
         if (menu.hidden) {
-          menu.__fxLeaving = false;
+          menu.__mvLeaving = false;
           menu.hidden = false;
           MVAnim.overlayEnter(menu, 'dropdown');
         } else {
