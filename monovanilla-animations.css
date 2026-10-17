@@ -696,11 +696,11 @@
   .mv-notif-close:hover { background: #f4f4f5; background: var(--mv-soft, #f4f4f5); color: #18181b; color: var(--mv-fg, #18181b); }
 }
 .mv-notif-timer {
-  position: absolute; left: 12px; right: 12px; bottom: 5px; height: 3px;
-  overflow: hidden; border-radius: 999px; background: rgba(228, 228, 231, .5);
+  position: absolute; left: 0; right: 0; bottom: 0; height: 3px;
+  background: #e4e4e7; background: var(--mv-track, #e4e4e7);
 }
 .mv-notif-timer-bar {
-  display: block; width: 100%; height: 100%; border-radius: 999px;
+  display: block; width: 100%; height: 100%;
   background: #a1a1aa; background: var(--mv-muted, #a1a1aa);
   box-shadow: 0 0 5px rgba(161, 161, 170, .5);
   -webkit-transform-origin: left center; transform-origin: left center;
