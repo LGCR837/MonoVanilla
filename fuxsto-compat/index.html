@@ -87,6 +87,8 @@
   }
 
   * { -webkit-box-sizing: border-box; box-sizing: border-box; }
+  /* hidden 属性必须压过 .fx-dialog-wrap 等规则的显式 display, 否则浮层关不掉 */
+  [hidden] { display: none !important; }
   body {
     margin: 0;
     padding: 24px 16px 64px;
