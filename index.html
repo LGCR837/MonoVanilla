@@ -390,6 +390,8 @@
   .car-view { overflow: hidden; max-width: 320px; }
   .car-track { display: -webkit-box; display: -webkit-flex; display: flex; width: 300%; }
   .car-item { width: 33.3333%; padding: 22px; text-align: center; -webkit-box-sizing: border-box; box-sizing: border-box; }
+  .flip-list { display: -webkit-box; display: -webkit-flex; display: flex; -webkit-flex-wrap: wrap; flex-wrap: wrap; }
+  .flip-item { width: 110px; padding: 14px 10px; margin: 4px; border-radius: 8px; background: #fff; background: var(--mv-surface-95, #fff); border: 1px solid #e4e4e7; border-color: var(--mv-card-bd, #e4e4e7); box-shadow: 0 1px 2px rgba(0,0,0,.06); font-size: 13px; font-weight: 600; text-align: center; color: #18181b; color: var(--mv-fg); }
 </style>
 </head>
 <body>
@@ -613,10 +615,29 @@
      <div class="row" style="margin-top:10px">
        <button class="btn" id="alertToggle">展开 / 收起告警（图标弹出 + 内容展开）</button>
      </div>
-     <p class="note">对话框 = dialog-pop（面板 16px 模糊 + 0.92 缩放）+ dialog-mask（遮罩淡入）；抽屉 = drawer-right（整侧滑入）；菜单 = dropdown（左上角原点缩放 + 模糊）。点击遮罩外或菜单外部会关闭菜单。</p>
-   </div>
+      <p class="note">对话框 = dialog-pop（面板 16px 模糊 + 0.92 缩放）+ dialog-mask（遮罩淡入）；抽屉 = drawer-right（整侧滑入）；菜单 = dropdown（左上角原点缩放 + 模糊）。点击遮罩外或菜单外部会关闭菜单。</p>
+    </div>
 
-   <p class="note">MVAnim.hasAnimate() = <span id="waapi">-</span> / MVAnim.reduced() = <span id="reduced">-</span></p>
+    <!-- 12. FlipGroup 通用列表 -->
+    <div class="card">
+      <h2>12. FlipGroup · 通用列表 FLIP（命令式）</h2>
+      <div class="flip-list" id="flipList">
+        <div class="flip-item">部署</div>
+        <div class="flip-item">校验</div>
+        <div class="flip-item">打包</div>
+        <div class="flip-item">发布</div>
+        <div class="flip-item">回滚</div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn btn-dark" id="flipShuffle">随机重排</button>
+        <button class="btn" id="flipAdd">追加一项</button>
+        <button class="btn" id="flipRemove">移除末项</button>
+        <button class="btn" id="flipMove">首项到末位</button>
+      </div>
+      <p class="note">MVAnim.flipGroup(el, mutate)：在容器内做增删 / 重排前先快照子元素位置，变更后倒置 + 重排，兄弟项平滑位移（等价 Vue TransitionGroup 的 move；零 CSS 依赖、纯内联 transition，Chrome 38 可用）。tabs 切换、卡片重排、拖拽落位、虚拟列表都能用。底层 flipPre / flipPost 可单独调用。</p>
+    </div>
+
+    <p class="note">MVAnim.hasAnimate() = <span id="waapi">-</span> / MVAnim.reduced() = <span id="reduced">-</span></p>
  </div>
 
  <div class="mv-mask" id="dlgMask" hidden></div>
@@ -900,6 +921,32 @@
     if ($('notifLeft')) { $('notifLeft').onclick = function () { MVAnim.notification({ side: 'left', type: 'warning', title: '换个位置', text: 'placement: top-left' }); }; }
     if ($('notifBottom')) { $('notifBottom').onclick = function () { MVAnim.notification({ side: 'bottom', type: 'error', title: '证书即将过期', text: '还有 7 天。', duration: 0, closable: true }); }; }
     if ($('notifCloseAll')) { $('notifCloseAll').onclick = function () { MVAnim.closeAllMessages(); MVAnim.closeAllNotifs(); }; }
+    function _mkChip(label) {
+      var c = document.createElement('div');
+      c.className = 'flip-item';
+      c.textContent = label;
+      return c;
+    }
+    if ($('flipShuffle')) { $('flipShuffle').onclick = function () {
+      MVAnim.flipGroup($('flipList'), function (box) {
+        var arr = [];
+        for (var i = 0; i < box.children.length; i++) { arr.push(box.children[i]); }
+        for (var j = arr.length - 1; j > 0; j--) {
+          var k = Math.floor(Math.random() * (j + 1));
+          var tmp = arr[j]; arr[j] = arr[k]; arr[k] = tmp;
+        }
+        for (var m = 0; m < arr.length; m++) { box.appendChild(arr[m]); }
+      });
+    }; }
+    if ($('flipAdd')) { $('flipAdd').onclick = function () {
+      MVAnim.flipGroup($('flipList'), function (box) { box.appendChild(_mkChip('新增-' + Math.floor(Math.random() * 89 + 10))); });
+    }; }
+    if ($('flipRemove')) { $('flipRemove').onclick = function () {
+      MVAnim.flipGroup($('flipList'), function (box) { if (box.lastElementChild) { box.removeChild(box.lastElementChild); } });
+    }; }
+    if ($('flipMove')) { $('flipMove').onclick = function () {
+      MVAnim.flipGroup($('flipList'), function (box) { if (box.firstElementChild) { box.appendChild(box.firstElementChild); } });
+    }; }
   })();
 
   /* 11. 浮层: 对话框 / 抽屉 / 菜单 / 告警 */

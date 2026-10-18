@@ -654,6 +654,65 @@
     _flipPost(stack, name, pre);
   }
 
+  function flipPre(container) {
+    var out = [];
+    var kids = container ? container.children : null;
+    for (var i = 0; kids && i < kids.length; i++) {
+      out.push({ el: kids[i], old: kids[i].getBoundingClientRect() });
+    }
+    return out;
+  }
+
+  function flipPost(container, snapshot, opts) {
+    opts = opts || {};
+    if (!snapshot || reduced()) { return; }
+    var dur = opts.duration != null ? opts.duration : 400;
+    var ease = opts.easing || EASE_SWIFT;
+    var moved = [];
+    for (var i = 0; i < snapshot.length; i++) {
+      var el = snapshot[i].el;
+      if (!el.parentNode) { continue; }
+      var oldR = snapshot[i].old;
+      var newR = el.getBoundingClientRect();
+      var dx = oldR.left - newR.left;
+      var dy = oldR.top - newR.top;
+      if (dx === 0 && dy === 0) { continue; }
+      el.style.transition = 'none';
+      el.style.webkitTransition = 'none';
+      el.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
+      el.style.webkitTransform = 'translate(' + dx + 'px, ' + dy + 'px)';
+      moved.push(el);
+    }
+    if (!moved.length) { return; }
+    if (container && container.offsetHeight != null) { container.offsetHeight; } else { document.body.offsetHeight; }
+    raf(function () {
+      for (var j = 0; j < moved.length; j++) {
+        var m = moved[j];
+        m.style.transition = 'transform ' + dur + 'ms ' + ease;
+        m.style.webkitTransition = '-webkit-transform ' + dur + 'ms ' + ease;
+        m.style.transform = '';
+        m.style.webkitTransform = '';
+        (function (target, d) {
+          setTimeout(function () {
+            target.style.transition = '';
+            target.style.webkitTransition = '';
+          }, d + 40);
+        })(m, dur);
+      }
+    });
+  }
+
+  function flipGroup(container, mutate, opts) {
+    if (!container) { return; }
+    if (reduced()) {
+      if (typeof mutate === 'function') { mutate(container); }
+      return;
+    }
+    var pre = flipPre(container);
+    if (typeof mutate === 'function') { mutate(container); }
+    flipPost(container, pre, opts);
+  }
+
   var _SVG_NS = 'http://www.w3.org/2000/svg';
   var _ICON_PATHS = {
     info: [
@@ -857,6 +916,9 @@
     message: message,
     notification: notification,
     closeAllMessages: closeAllMessages,
-    closeAllNotifs: closeAllNotifs
+    closeAllNotifs: closeAllNotifs,
+    flipPre: flipPre,
+    flipPost: flipPost,
+    flipGroup: flipGroup
   };
 });
