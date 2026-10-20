@@ -374,6 +374,11 @@
       from: { opacity: '0', filter: 'blur(12px)' },
       to: { opacity: '0', filter: 'blur(12px)' }
     },
+    'tooltip': {
+      dur: 180, ease: EASE_SWIFT,
+      from: { opacity: '0' },
+      to: { opacity: '0' }
+    },
     'message-flip': {
       from: { opacity: '0', filter: 'blur(15px)', transform: 'translateY(-20px) scale(0.5)' },
       to: { opacity: '0', filter: 'blur(10px)', transform: 'translateY(-15px) scale(0)' }
@@ -882,6 +887,49 @@
     flipPost(container, pre, opts);
   }
 
+  function _popPosition(anchor, el, gap) {
+    var r = anchor.getBoundingClientRect();
+    var off = (gap == null ? 8 : gap);
+    var sw = win.innerWidth || document.documentElement.clientWidth;
+    var sh = win.innerHeight || document.documentElement.clientHeight;
+    var ew = el.offsetWidth;
+    var eh = el.offsetHeight;
+    var left = r.left + r.width / 2 - ew / 2;
+    var top = r.bottom + off;
+    var place = 'bottom';
+    if (top + eh > sh - off && r.top - off - eh >= off) { top = r.top - off - eh; place = 'top'; }
+    if (left < off) { left = off; }
+    if (left + ew > sw - off) { left = sw - off - ew; }
+    el.style.left = left + 'px';
+    el.style.top = top + 'px';
+    el.setAttribute('data-place', place);
+  }
+
+  function tooltip(anchor, text, opts) {
+    opts = opts || {};
+    if (!anchor || text == null || text === '') { return { el: null, close: function () { } }; }
+    var el = document.createElement('div');
+    el.className = 'mv-tooltip';
+    el.setAttribute('role', 'tooltip');
+    el.setAttribute('aria-hidden', 'true');
+    el.appendChild(document.createTextNode(String(text)));
+    document.body.appendChild(el);
+    el.style.zIndex = (opts.zIndex != null ? String(opts.zIndex) : '9500');
+    _popPosition(anchor, el, opts.gap);
+    overlayEnter(el, 'tooltip');
+    el.setAttribute('aria-hidden', 'false');
+    var closed = false;
+    function close() {
+      if (closed) { return; }
+      closed = true;
+      el.setAttribute('aria-hidden', 'true');
+      overlayLeave(el, 'tooltip', function () {
+        if (el.parentNode) { el.parentNode.removeChild(el); }
+      });
+    }
+    return { el: el, close: close };
+  }
+
   var _SVG_NS = 'http://www.w3.org/2000/svg';
   var _ICON_PATHS = {
     info: [
@@ -1092,6 +1140,7 @@
     transition: transition,
     openOverlay: openOverlay,
     closeOverlay: closeOverlay,
-    activeOverlayCount: function () { return _overlayStack.length; }
+    activeOverlayCount: function () { return _overlayStack.length; },
+    tooltip: tooltip
   };
 });

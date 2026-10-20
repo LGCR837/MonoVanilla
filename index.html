@@ -637,6 +637,16 @@
       <p class="note">MVAnim.flipGroup(el, mutate)：在容器内做增删 / 重排前先快照子元素位置，变更后倒置 + 重排，兄弟项平滑位移（等价 Vue TransitionGroup 的 move；零 CSS 依赖、纯内联 transition，Chrome 38 可用）。tabs 切换、卡片重排、拖拽落位、虚拟列表都能用。底层 flipPre / flipPost 可单独调用。</p>
     </div>
 
+    <!-- 13. Tooltip -->
+    <div class="card">
+      <h2>13. Tooltip · 方向自适应浮层（命令式）</h2>
+      <div class="row">
+        <button class="btn btn-dark" id="tipBtn">悬停看提示</button>
+        <button class="btn" id="tipBtnFar">悬停（长内容 + 靠边）</button>
+      </div>
+      <p class="note">MVAnim.tooltip(anchor, text, opts)：相对锚点定位、水平居中、视口放不下自动上下翻转；淡入淡出 180ms（WAAPI opacity，Chrome 38 可用），pointer-events:none 不挡交互。返回 { el, close() }，悬停显示、移开关闭。opts：gap（间距）、zIndex。</p>
+    </div>
+
     <p class="note">MVAnim.hasAnimate() = <span id="waapi">-</span> / MVAnim.reduced() = <span id="reduced">-</span></p>
  </div>
 
@@ -947,6 +957,15 @@
     if ($('flipMove')) { $('flipMove').onclick = function () {
       MVAnim.flipGroup($('flipList'), function (box) { if (box.firstElementChild) { box.appendChild(box.firstElementChild); } });
     }; }
+    function _hoverTip(id, text) {
+      var btn = $(id);
+      if (!btn) { return; }
+      var tip = null;
+      btn.onmouseenter = function () { tip = MVAnim.tooltip(btn, text, { gap: 8 }); };
+      btn.onmouseleave = function () { if (tip) { tip.close(); tip = null; } };
+    }
+    _hoverTip('tipBtn', '这是一条小提示：悬停淡入，移开淡出并回收。');
+    _hoverTip('tipBtnFar', '长内容：浮层水平居中、靠近边缘时被夹住，视口下方放不下就自动翻到锚点上方。');
   })();
 
   /* 11. 浮层: 对话框 / 抽屉 / 菜单 / 告警 */
