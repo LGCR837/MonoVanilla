@@ -746,6 +746,9 @@
     if (!_msgStack) {
       _msgStack = document.createElement('div');
       _msgStack.className = 'mv-message-stack';
+      _msgStack.setAttribute('role', 'status');
+      _msgStack.setAttribute('aria-live', 'polite');
+      _msgStack.setAttribute('aria-label', '消息');
       document.body.appendChild(_msgStack);
     }
     return _msgStack;
@@ -755,6 +758,9 @@
       var st = document.createElement('div');
       st.className = 'mv-notif-stack';
       st.setAttribute('data-side', side);
+      st.setAttribute('role', 'region');
+      st.setAttribute('aria-live', 'polite');
+      st.setAttribute('aria-label', '通知');
       document.body.appendChild(st);
       _notifStacks[side] = st;
     }
