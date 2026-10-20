@@ -650,6 +650,95 @@
     return { enter: enter, leave: leave, setDuration: function (d) { dur = d; } };
   }
 
+  var _overlayStack = [];
+  var _ovKeyBound = false;
+  var _OV_Z_BASE = 9000;
+  var _OV_Z_STEP = 10;
+
+  function _ovFocusable(root) {
+    var sel = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+    var els = [];
+    try { els = root.querySelectorAll(sel); } catch (e) { els = []; }
+    var out = [];
+    for (var i = 0; i < els.length; i++) { out.push(els[i]); }
+    return out;
+  }
+  function _ovTop() { return _overlayStack.length ? _overlayStack[_overlayStack.length - 1] : null; }
+  function _ovBindKey() {
+    if (_ovKeyBound) { return; }
+    document.addEventListener('keydown', _ovOnKey, true);
+    _ovKeyBound = true;
+  }
+  function _ovUnbindKey() {
+    if (!_ovKeyBound) { return; }
+    document.removeEventListener('keydown', _ovOnKey, true);
+    _ovKeyBound = false;
+  }
+  function _ovOnKey(e) {
+    var top = _ovTop();
+    if (!top) { return; }
+    var key = e.key != null ? e.key : (e.keyCode === 27 ? 'Escape' : (e.keyCode === 9 ? 'Tab' : ''));
+    if (e.keyCode === 27 || key === 'Escape') {
+      if (top.opts && top.opts.onEsc === false) { return; }
+      e.preventDefault();
+      closeOverlay(top.mask, top.panel, top.wrap, top.name, top.opts);
+      return;
+    }
+    if (e.keyCode === 9 || key === 'Tab') {
+      if (!top.panel) { return; }
+      var f = _ovFocusable(top.panel);
+      if (!f.length) { return; }
+      var first = f[0], last = f[f.length - 1];
+      var active = document.activeElement;
+      var outside = !active || !top.panel.contains(active);
+      if (e.shiftKey) {
+        if (active === first || outside) { e.preventDefault(); last.focus(); }
+      } else {
+        if (active === last || outside) { e.preventDefault(); first.focus(); }
+      }
+    }
+  }
+  function openOverlay(mask, panel, wrap, name, opts) {
+    opts = opts || {};
+    if (!panel || !name) { return null; }
+    for (var i = 0; i < _overlayStack.length; i++) {
+      if (_overlayStack[i].panel === panel) { return _overlayStack[i]; }
+    }
+    var entry = { mask: mask, panel: panel, wrap: wrap, name: name, opts: opts, lastFocus: document.activeElement, z: 0 };
+    _overlayStack.push(entry);
+    entry.z = _OV_Z_BASE + _overlayStack.length * _OV_Z_STEP;
+    if (mask) { mask.style.zIndex = entry.z; }
+    if (wrap) { wrap.style.zIndex = entry.z + 1; }
+    panel.style.zIndex = entry.z + 1;
+    _ovBindKey();
+    overlayOpen(mask, panel, wrap, name);
+    if (opts.focus !== false) {
+      var f = _ovFocusable(panel);
+      var target = (panel.tabIndex != null && panel.tabIndex >= 0) ? panel : (f.length ? f[0] : null);
+      if (target) { setTimeout(function () { try { target.focus(); } catch (e2) { } }, 0); }
+    }
+    return entry;
+  }
+  function closeOverlay(mask, panel, wrap, name, opts) {
+    opts = opts || {};
+    var idx = -1;
+    for (var i = 0; i < _overlayStack.length; i++) {
+      if (_overlayStack[i].panel === panel) { idx = i; break; }
+    }
+    if (idx === -1) {
+      overlayClose(mask, panel, wrap, name, opts.onClosed || null);
+      return;
+    }
+    var entry = _overlayStack[idx];
+    _overlayStack.splice(idx, 1);
+    var restore = entry.lastFocus;
+    overlayClose(mask, panel, wrap, name, function () {
+      if (restore && restore.focus && restore.parentNode) { try { restore.focus(); } catch (e2) { } }
+      if (opts.onClosed) { opts.onClosed(); }
+      if (!_overlayStack.length) { _ovUnbindKey(); }
+    });
+  }
+
   var _msgStack = null;
   var _notifStacks = {};
 
@@ -994,6 +1083,9 @@
     flipPre: flipPre,
     flipPost: flipPost,
     flipGroup: flipGroup,
-    transition: transition
+    transition: transition,
+    openOverlay: openOverlay,
+    closeOverlay: closeOverlay,
+    activeOverlayCount: function () { return _overlayStack.length; }
   };
 });

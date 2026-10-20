@@ -615,7 +615,7 @@
      <div class="row" style="margin-top:10px">
        <button class="btn" id="alertToggle">展开 / 收起告警（图标弹出 + 内容展开）</button>
      </div>
-      <p class="note">对话框 = dialog-pop（面板 16px 模糊 + 0.92 缩放）+ dialog-mask（遮罩淡入）；抽屉 = drawer-right（整侧滑入）；菜单 = dropdown（左上角原点缩放 + 模糊）。点击遮罩外或菜单外部会关闭菜单。</p>
+      <p class="note">对话框 = dialog-pop（面板 16px 模糊 + 0.92 缩放）+ dialog-mask（遮罩淡入）；抽屉 = drawer-right（整侧滑入）；菜单 = dropdown（左上角原点缩放 + 模糊）。对话框 / 抽屉走 openOverlay / closeOverlay：后开的弹层 z-index 更高、Esc 关闭最上层、Tab 焦点在弹层内循环，关闭后焦点回到触发按钮。菜单点外部关闭。</p>
     </div>
 
     <!-- 12. FlipGroup 通用列表 -->
@@ -952,10 +952,10 @@
   /* 11. 浮层: 对话框 / 抽屉 / 菜单 / 告警 */
   (function () {
     function showOverlay(maskId, elId, panelName, wrapId) {
-      MVAnim.overlayOpen($(maskId), $(elId), wrapId ? $(wrapId) : null, panelName);
+      MVAnim.openOverlay($(maskId), $(elId), wrapId ? $(wrapId) : null, panelName, { focus: true });
     }
     function hideOverlay(maskId, elId, panelName, wrapId) {
-      MVAnim.overlayClose($(maskId), $(elId), wrapId ? $(wrapId) : null, panelName);
+      MVAnim.closeOverlay($(maskId), $(elId), wrapId ? $(wrapId) : null, panelName);
     }
     if ($('dlgOpen')) { $('dlgOpen').onclick = function () { showOverlay('dlgMask', 'dlgPanel', 'dialog-pop', 'dlgWrap'); }; }
     if ($('dlgCancel')) { $('dlgCancel').onclick = function () { hideOverlay('dlgMask', 'dlgPanel', 'dialog-pop', 'dlgWrap'); }; }
