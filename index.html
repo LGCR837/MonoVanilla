@@ -647,6 +647,51 @@
       <p class="note">MVAnim.tooltip(anchor, text, opts)：相对锚点定位、水平居中、视口放不下自动上下翻转；淡入淡出 180ms（WAAPI opacity，Chrome 38 可用），pointer-events:none 不挡交互。返回 { el, close() }，悬停显示、移开关闭。opts：gap（间距）、zIndex。</p>
     </div>
 
+    <!-- 14. 组件级过渡 -->
+    <div class="card">
+      <h2>14. 组件级过渡 · Select / Tabs / Carousel / Tour</h2>
+
+      <div class="row">
+        <div class="pop-anchor">
+          <button class="btn btn-dark" id="selBtn" aria-haspopup="listbox">环境：<span id="selVal">production</span></button>
+          <div class="mv-select-panel" id="selPanel" role="listbox" aria-label="选择环境" hidden>
+            <button class="sel-opt" data-on="1" role="option" data-v="production">production</button>
+            <button class="sel-opt" role="option" data-v="staging">staging</button>
+            <button class="sel-opt" role="option" data-v="development">development</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="xf-tabs" style="margin-top:14px">
+        <button class="xf-tab on" data-i="0">概览</button>
+        <button class="xf-tab" data-i="1">日志</button>
+        <button class="xf-tab" data-i="2">设置</button>
+      </div>
+      <div class="xf-body" id="xfBody">
+        <div class="xf-pane">概览：3 个服务在线，平均延迟 42ms。</div>
+      </div>
+
+      <div class="mini-carousel" style="margin-top:14px">
+        <div class="mini-track" id="miniTrack">
+          <div class="mini-slide" style="background:#f4f4f5">1 / 3 · 构建</div>
+          <div class="mini-slide" style="background:#e0f2fe">2 / 3 · 测试</div>
+          <div class="mini-slide" style="background:#dcfce7">3 / 3 · 发布</div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="miniPrev">上一张</button>
+        <button class="btn" id="miniNext">下一张</button>
+        <span class="note" style="margin:0" id="miniIdx">1 / 3</span>
+      </div>
+
+      <div class="row" style="margin-top:14px">
+        <button class="btn btn-dark" id="tourBtn">开始引导</button>
+        <span class="tour-target" id="tourTarget">这里是关键操作区</span>
+      </div>
+
+      <p class="note">MVAnim.panelPop(panel, anchor, opts)：Select / Cascader 下拉面板，自动定位 + 上下翻转，点外部 / Esc 关闭。MVAnim.crossFade(el, mutate, opts)：Tabs 内容切换，旧内容淡出位移、换新后淡入。MVAnim.carouselTo(track, index, opts)：按索引平移到目标页，支持循环。MVAnim.spotlight(target, opts)：Tour 高亮，用超大 box-shadow 挖洞聚焦目标，滚动 / 缩放时跟随。</p>
+    </div>
+
     <p class="note">MVAnim.hasAnimate() = <span id="waapi">-</span> / MVAnim.reduced() = <span id="reduced">-</span></p>
  </div>
 
@@ -1021,6 +1066,73 @@
         } else {
           MVAnim.overlayLeave(alertBody, 'alert-expand', function () { alertBody.style.display = 'none'; });
         }
+      };
+    }
+  })();
+
+  /* 14. 组件级过渡: Select / Tabs / Carousel / Tour */
+  (function () {
+    var selBtn = $('selBtn'), selPanel = $('selPanel'), selVal = $('selVal');
+    if (selBtn && selPanel) {
+      var sel = MVAnim.panelPop(selPanel, selBtn, { gap: 6 });
+      selBtn.onclick = function (e) { e.stopPropagation(); sel.toggle(); };
+      var selOpts = selPanel.getElementsByTagName('button');
+      for (var i = 0; i < selOpts.length; i++) {
+        (function (b) {
+          b.onclick = function () {
+            for (var k = 0; k < selOpts.length; k++) { selOpts[k].setAttribute('data-on', '0'); }
+            b.setAttribute('data-on', '1');
+            if (selVal) { selVal.innerHTML = b.getAttribute('data-v'); }
+            sel.close();
+          };
+        })(selOpts[i]);
+      }
+    }
+
+    var xfBody = $('xfBody');
+    var xfTabs = document.getElementsByClassName('xf-tab');
+    if (xfBody && xfTabs.length) {
+      var panes = [
+        '概览：3 个服务在线，平均延迟 42ms。',
+        '日志：最近 20 条构建记录，全部通过。',
+        '设置：自动部署已开启，保留最近 5 个版本。'
+      ];
+      function pick(i) {
+        MVAnim.crossFade(xfBody, function (box) {
+          while (box.firstChild) { box.removeChild(box.firstChild); }
+          var p = document.createElement('div');
+          p.className = 'xf-pane';
+          p.appendChild(document.createTextNode(panes[i]));
+          box.appendChild(p);
+        });
+      }
+      for (var t = 0; t < xfTabs.length; t++) {
+        (function (tab) {
+          tab.onclick = function () {
+            for (var k = 0; k < xfTabs.length; k++) { xfTabs[k].className = 'xf-tab'; }
+            tab.className = 'xf-tab on';
+            pick(parseInt(tab.getAttribute('data-i'), 10) || 0);
+          };
+        })(xfTabs[t]);
+      }
+    }
+
+    var miniTrack = $('miniTrack'), miniIdx = $('miniIdx');
+    if (miniTrack) {
+      var mi = 0, mt = miniTrack.children.length;
+      function miGo(n) {
+        mi = MVAnim.carouselTo(miniTrack, n, { loop: true });
+        if (miniIdx) { miniIdx.innerHTML = (mi + 1) + ' / ' + mt; }
+      }
+      if ($('miniPrev')) { $('miniPrev').onclick = function () { miGo(mi - 1); }; }
+      if ($('miniNext')) { $('miniNext').onclick = function () { miGo(mi + 1); }; }
+    }
+
+    if ($('tourBtn') && $('tourTarget')) {
+      var spot = null;
+      $('tourBtn').onclick = function () {
+        if (spot) { spot.close(); spot = null; return; }
+        spot = MVAnim.spotlight($('tourTarget'), { padding: 10, radius: 12, onClosed: function () { spot = null; } });
       };
     }
   })();
