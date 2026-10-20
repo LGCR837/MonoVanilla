@@ -438,26 +438,39 @@
     return name === 'message-flip' || name.indexOf('notif-flip-') === 0;
   }
 
-  function overlayEnter(el, name) {
+  function _normHooks(hooks) {
+    if (typeof hooks === 'function') { return { before: null, after: hooks }; }
+    hooks = hooks || {};
+    return {
+      before: hooks.beforeEnter || hooks.beforeLeave || null,
+      after: hooks.afterEnter || hooks.afterLeave || null
+    };
+  }
+
+  function overlayEnter(el, name, hooks) {
     if (!el || !name) { return; }
     var st = _OVERLAY_STATE[name];
     var dur = (st && st.dur) || 400;
     var ease = (st && st.ease) || EASE_SWIFT;
     var gen = (el.__mvGen = (el.__mvGen || 0) + 1);
+    var H = _normHooks(hooks);
     el.__mvLeaving = false;
     if (el.__mvAnim) {
       try { el.__mvAnim.cancel(); } catch (e2) {
- }
+  }
       el.__mvAnim = null;
     }
     _removeClass(el, name + '-leave-active');
     _removeClass(el, name + '-leave-to');
     _clearState(el, st ? st.to : null);
 
+    if (H.before) { H.before(el); }
+
     if (reduced()) {
       _clearState(el, st ? st.from : null);
       _removeClass(el, name + '-enter-active');
       _removeClass(el, name + '-enter-from');
+      if (H.after) { H.after(el); }
       return;
     }
 
@@ -469,6 +482,7 @@
         _removeClass(el, name + '-enter-active');
         _removeClass(el, name + '-enter-from');
         if (el.__mvAnim === a) { el.__mvAnim = null; }
+        if (H.after) { H.after(el); }
       };
       return;
     }
@@ -483,11 +497,13 @@
     setTimeout(function () {
       if (el.__mvGen !== gen) { return; }
       _removeClass(el, name + '-enter-active');
+      if (H.after) { H.after(el); }
     }, dur + 40);
   }
 
-  function overlayLeave(el, name, onDone) {
-    if (!el || !name) { if (onDone) { onDone(); } return; }
+  function overlayLeave(el, name, hooks) {
+    var H = _normHooks(hooks);
+    if (!el || !name) { if (H.after) { H.after(el); } return; }
     var st = _OVERLAY_STATE[name];
     var dur = (st && st.dur) || 400;
     var ease = (st && st.ease) || EASE_SWIFT;
@@ -495,19 +511,21 @@
     el.__mvLeaving = true;
     if (el.__mvAnim) {
       try { el.__mvAnim.cancel(); } catch (e2) {
- }
+  }
       el.__mvAnim = null;
     }
     _removeClass(el, name + '-enter-active');
     _removeClass(el, name + '-enter-from');
     _clearState(el, st ? st.from : null);
 
+    if (H.before) { H.before(el); }
+
     if (reduced()) {
       el.__mvLeaving = false;
       _removeClass(el, name + '-leave-active');
       _removeClass(el, name + '-leave-to');
       _clearState(el, st ? st.to : null);
-      if (onDone) { onDone(); }
+      if (H.after) { H.after(el); }
       return;
     }
 
@@ -519,7 +537,7 @@
       _removeClass(el, name + '-leave-active');
       _removeClass(el, name + '-leave-to');
       _clearState(el, st ? st.to : null);
-      if (onDone) { onDone(); }
+      if (H.after) { H.after(el); }
     }
 
     if (hasAnimate() && el.animate && st && !_isFlip(name)) {
@@ -532,7 +550,7 @@
       setTimeout(function () {
         if (el.__mvAnim === a) {
           try { a.cancel(); } catch (e2) {
- }
+  }
           el.__mvAnim = null;
           finish();
         }
@@ -574,6 +592,62 @@
     overlayLeave(mask, 'dialog-mask', function () {
       if (mask) { mask.hidden = true; mask.style.display = 'none'; }
     });
+  }
+
+  function transition(el, name, hooks) {
+    hooks = hooks || {};
+    function noop() {}
+    if (!el || !name) { return { enter: noop, leave: noop }; }
+    var st = _OVERLAY_STATE[name];
+    var dur = hooks.duration != null ? hooks.duration : ((st && st.dur) || 400);
+    function fire(cb, target) { if (typeof cb === 'function') { cb(target); } }
+    var entered = false;
+    var leaving = false;
+    function enter() {
+      if (entered) { return; }
+      entered = true;
+      fire(hooks.beforeEnter, el);
+      if (reduced()) { fire(hooks.afterEnter, el); return; }
+      if (hooks.enter) {
+        var done = false;
+        var timer = setTimeout(function () {
+          if (done) { return; }
+          done = true;
+          fire(hooks.afterEnter, el);
+        }, dur + 40);
+        hooks.enter(el, function () {
+          if (done) { return; }
+          done = true;
+          clearTimeout(timer);
+          fire(hooks.afterEnter, el);
+        });
+      } else {
+        overlayEnter(el, name, { afterEnter: function (target) { fire(hooks.afterEnter, target); } });
+      }
+    }
+    function leave() {
+      if (leaving) { return; }
+      leaving = true;
+      fire(hooks.beforeLeave, el);
+      if (reduced()) { fire(hooks.afterLeave, el); return; }
+      if (hooks.leave) {
+        var done = false;
+        var timer = setTimeout(function () {
+          if (done) { return; }
+          done = true;
+          fire(hooks.afterLeave, el);
+        }, dur + 40);
+        hooks.leave(el, function () {
+          if (done) { return; }
+          done = true;
+          clearTimeout(timer);
+          fire(hooks.afterLeave, el);
+        });
+      } else {
+        overlayLeave(el, name, { afterLeave: function (target) { fire(hooks.afterLeave, target); } });
+      }
+    }
+    return { enter: enter, leave: leave, setDuration: function (d) { dur = d; } };
   }
 
   var _msgStack = null;
@@ -919,6 +993,7 @@
     closeAllNotifs: closeAllNotifs,
     flipPre: flipPre,
     flipPost: flipPost,
-    flipGroup: flipGroup
+    flipGroup: flipGroup,
+    transition: transition
   };
 });
