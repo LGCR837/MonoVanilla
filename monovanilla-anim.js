@@ -756,6 +756,28 @@
 
   var _msgStack = null;
   var _notifStacks = {};
+  var _limits = { message: 0, notif: 0 };
+
+  function setStackLimit(kind, n) {
+    n = parseInt(n, 10) || 0;
+    if (kind === 'notification' || kind === 'notif') { _limits.notif = n; }
+    else if (kind === 'message') { _limits.message = n; }
+    return n;
+  }
+
+  function _trimStack(stack, limit) {
+    if (!limit || !stack) { return; }
+    var live = [];
+    for (var i = 0; i < stack.children.length; i++) {
+      var c = stack.children[i];
+      if (!c.__mvLeaving) { live.push(c); }
+    }
+    while (live.length >= limit) {
+      var old = live.shift();
+      if (old && old.__mvDismiss) { old.__mvDismiss(); }
+      else if (old && old.parentNode) { old.parentNode.removeChild(old); }
+    }
+  }
 
   function _ensureMsgStack() {
     if (!_msgStack) {
@@ -1143,6 +1165,71 @@
     return { el: el, close: close, reposition: place };
   }
 
+  function revealOn(targets, opts) {
+    opts = opts || {};
+    var els = [];
+    if (typeof targets === 'string') {
+      var list = document.querySelectorAll(targets);
+      for (var i = 0; i < list.length; i++) { els.push(list[i]); }
+    } else if (targets && targets.nodeType === 1) {
+      els.push(targets);
+    } else if (targets && targets.length) {
+      for (var j = 0; j < targets.length; j++) { els.push(targets[j]); }
+    }
+    var cls = opts.className || 'mv-scroll-reveal-in';
+    function show(el, idx) {
+      if (!el || el.__mvRevealed) { return; }
+      el.__mvRevealed = true;
+      var d = (opts.stagger ? idx * opts.stagger : 0) + (opts.delay || 0);
+      if (d) {
+        el.style.transitionDelay = d + 'ms';
+        el.style.webkitTransitionDelay = d + 'ms';
+      }
+      _addClass(el, cls);
+    }
+    if (!els.length) { return { disconnect: function () { } }; }
+    if (reduced()) {
+      for (var r = 0; r < els.length; r++) { show(els[r], r); }
+      return { disconnect: function () { } };
+    }
+    if (typeof IntersectionObserver !== 'undefined') {
+      var io = new IntersectionObserver(function (entries) {
+        for (var e = 0; e < entries.length; e++) {
+          if (entries[e].isIntersecting) {
+            show(entries[e].target, els.indexOf(entries[e].target));
+            if (opts.once !== false) { io.unobserve(entries[e].target); }
+          }
+        }
+      }, {
+        root: opts.root || null,
+        rootMargin: opts.rootMargin || '0px',
+        threshold: opts.threshold != null ? opts.threshold : 0.15
+      });
+      for (var o = 0; o < els.length; o++) { io.observe(els[o]); }
+      return { disconnect: function () { io.disconnect(); } };
+    }
+    var ticking = false;
+    function check() {
+      ticking = false;
+      var vh = win.innerHeight || document.documentElement.clientHeight;
+      var th = opts.threshold != null ? opts.threshold : 0.15;
+      for (var k = 0; k < els.length; k++) {
+        var el = els[k];
+        if (el.__mvRevealed) { continue; }
+        var rc = el.getBoundingClientRect();
+        if (rc.top < vh * (1 - th) && rc.bottom > 0) { show(el, k); }
+      }
+    }
+    function onScroll() { if (!ticking) { ticking = true; raf(check); } }
+    win.addEventListener('scroll', onScroll, false);
+    win.addEventListener('resize', onScroll, false);
+    check();
+    return { disconnect: function () {
+      win.removeEventListener('scroll', onScroll, false);
+      win.removeEventListener('resize', onScroll, false);
+    } };
+  }
+
   var _SVG_NS = 'http://www.w3.org/2000/svg';
   var _ICON_PATHS = {
     info: [
@@ -1223,6 +1310,8 @@
       closeBtn.onclick = dismiss;
       el.appendChild(closeBtn);
     }
+    _trimStack(stack, opts.max != null ? opts.max : _limits.message);
+    el.__mvDismiss = dismiss;
     var pre = _flipPre(stack);
     stack.appendChild(el);
     _flipPost(stack, 'message-flip', pre);
@@ -1291,6 +1380,8 @@
       timer.appendChild(bar);
       el.appendChild(timer);
     }
+    _trimStack(stack, opts.max != null ? opts.max : _limits.notif);
+    el.__mvDismiss = dismiss;
     var preN = _flipPre(stack);
     stack.appendChild(el);
     _flipPost(stack, 'notif-flip-' + side, preN);
@@ -1358,6 +1449,8 @@
     panelPop: panelPop,
     crossFade: crossFade,
     carouselTo: carouselTo,
-    spotlight: spotlight
+    spotlight: spotlight,
+    revealOn: revealOn,
+    setStackLimit: setStackLimit
   };
 });

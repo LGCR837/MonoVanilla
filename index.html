@@ -692,6 +692,20 @@
       <p class="note">MVAnim.panelPop(panel, anchor, opts)：Select / Cascader 下拉面板，自动定位 + 上下翻转，点外部 / Esc 关闭。MVAnim.crossFade(el, mutate, opts)：Tabs 内容切换，旧内容淡出位移、换新后淡入。MVAnim.carouselTo(track, index, opts)：按索引平移到目标页，支持循环。MVAnim.spotlight(target, opts)：Tour 高亮，用超大 box-shadow 挖洞聚焦目标，滚动 / 缩放时跟随。</p>
     </div>
 
+    <!-- 15. Scroll Reveal + 堆叠上限 -->
+    <div class="card">
+      <h2>15. Scroll Reveal · 滚动进入 + 堆叠上限</h2>
+      <div class="reveal-grid" id="revealGrid">
+        <div class="reveal-block mv-scroll-reveal"><b>STEP 01</b>滚动到此处淡入上移</div>
+        <div class="reveal-block mv-scroll-reveal"><b>STEP 02</b>支持错峰（stagger）</div>
+        <div class="reveal-block mv-scroll-reveal"><b>STEP 03</b>IntersectionObserver + 滚动回退</div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn" id="limitBtn">连发 5 条通知（上限 3）</button>
+      </div>
+      <p class="note">MVAnim.revealOn(targets, opts)：进入视口时给元素加 mv-scroll-reveal-in（配合 .mv-scroll-reveal 基类）；优先 IntersectionObserver，Chrome 38 回退到 scroll + rAF；支持 once / threshold / stagger / delay。MVAnim.setStackLimit('notification', 3)：限制同一侧最大条数，超出时自动淡出最旧一条；message / notification 也可用 opts.max 单次覆盖。</p>
+    </div>
+
     <p class="note">MVAnim.hasAnimate() = <span id="waapi">-</span> / MVAnim.reduced() = <span id="reduced">-</span></p>
  </div>
 
@@ -1133,6 +1147,25 @@
       $('tourBtn').onclick = function () {
         if (spot) { spot.close(); spot = null; return; }
         spot = MVAnim.spotlight($('tourTarget'), { padding: 10, radius: 12, onClosed: function () { spot = null; } });
+      };
+    }
+  })();
+
+  /* 15. Scroll reveal + 通知堆叠上限 */
+  (function () {
+    MVAnim.revealOn('.mv-scroll-reveal', { stagger: 70, threshold: 0.1 });
+    if ($('limitBtn')) {
+      $('limitBtn').onclick = function () {
+        for (var i = 0; i < 5; i++) {
+          (function (n) {
+            setTimeout(function () {
+              MVAnim.notification({
+                side: 'right', type: 'info', duration: 0, max: 3,
+                title: '通知 ' + n, text: '同一侧上限 3 条，超出会自动退场。'
+              });
+            }, n * 160);
+          })(i + 1);
+        }
       };
     }
   })();
