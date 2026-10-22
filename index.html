@@ -706,6 +706,20 @@
       <p class="note">MVAnim.revealOn(targets, opts)：进入视口时给元素加 mv-scroll-reveal-in（配合 .mv-scroll-reveal 基类）；优先 IntersectionObserver，Chrome 38 回退到 scroll + rAF；支持 once / threshold / stagger / delay。MVAnim.setStackLimit('notification', 3)：限制同一侧最大条数，超出时自动淡出最旧一条；message / notification 也可用 opts.max 单次覆盖。</p>
     </div>
 
+    <!-- 16. 数值滚动 -->
+    <div class="card">
+      <h2>16. 数值滚动 · countTo（命令式）</h2>
+      <div class="row">
+        <div class="metric"><b id="mRequests">0</b><span>请求 / 秒</span></div>
+        <div class="metric"><b id="mLatency">0</b><span>平均延迟</span></div>
+        <div class="metric"><b id="mUptime">0</b><span>可用性</span></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn btn-dark" id="countBtn">重新滚动</button>
+      </div>
+      <p class="note">MVAnim.countTo(el, to, opts)：把文本从起始值补间到目标值（默认 easeOutCubic），支持 from / duration / decimals / prefix / suffix / ease / onDone；reduced-motion 下直接落到终值，返回 { cancel }。</p>
+    </div>
+
     <p class="note">MVAnim.hasAnimate() = <span id="waapi">-</span> / MVAnim.reduced() = <span id="reduced">-</span></p>
  </div>
 
@@ -1168,6 +1182,17 @@
         }
       };
     }
+  })();
+
+  /* 16. 数值滚动 */
+  (function () {
+    function run() {
+      MVAnim.countTo($('mRequests'), 1286, { duration: 900 });
+      MVAnim.countTo($('mLatency'), 42, { duration: 900, suffix: ' ms' });
+      MVAnim.countTo($('mUptime'), 99.98, { duration: 900, decimals: 2, suffix: '%' });
+    }
+    if ($('countBtn')) { $('countBtn').onclick = run; }
+    run();
   })();
 })();
 </script>

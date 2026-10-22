@@ -280,6 +280,29 @@
   }
   function translateX(el, x, duration) { return _num(el, 'x', x, duration); }
 
+  function countTo(el, to, opts) {
+    opts = opts || {};
+    if (!el) { return null; }
+    var from = opts.from != null ? opts.from : (parseFloat(el.textContent) || 0);
+    var dur = opts.duration != null ? opts.duration : 800;
+    var dec = opts.decimals != null ? opts.decimals : 0;
+    var prefix = opts.prefix || '';
+    var suffix = opts.suffix || '';
+    var ease = typeof opts.ease === 'function' ? opts.ease : function (p) { return 1 - Math.pow(1 - p, 3); };
+    function fmt(v) { return prefix + Number(v).toFixed(dec) + suffix; }
+    if (reduced()) {
+      el.textContent = fmt(to);
+      if (opts.onDone) { opts.onDone(); }
+      return null;
+    }
+    return _tween(dur, function (p) {
+      el.textContent = fmt(from + (to - from) * ease(p));
+    }, function () {
+      el.textContent = fmt(to);
+      if (opts.onDone) { opts.onDone(); }
+    });
+  }
+
   function reveal(el, open) {
     if (!el || !el.classList) { return; }
     if (open) { el.classList.add('mv-reveal-open'); }
@@ -1427,6 +1450,7 @@
     animateWidth: animateWidth,
     slideTo: slideTo,
     translateX: translateX,
+    countTo: countTo,
     reveal: reveal,
     reduced: reduced,
     hasAnimate: hasAnimate,
