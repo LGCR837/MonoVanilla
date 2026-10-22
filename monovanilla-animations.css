@@ -898,3 +898,16 @@
   background: #eef2ff;
 }
 .imager-box img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+.pgr-track {
+  width: 100%; height: 8px; border-radius: 6px; overflow: hidden;
+  background: #e4e4e7; background: var(--mv-track, #e4e4e7);
+}
+.pgr-fill {
+  display: block; width: 100%; height: 100%;
+  background: linear-gradient(90deg, #818cf8, #34d399);
+  -webkit-transform-origin: left center; transform-origin: left center;
+  -webkit-transform: scaleX(0); transform: scaleX(0);
+}
+.pgr-ring { -webkit-transform: rotate(-90deg); transform: rotate(-90deg); }
+.pgr-ring circle { fill: none; -webkit-transform-origin: center; transform-origin: center; }

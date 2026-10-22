@@ -1317,6 +1317,37 @@
     return { el: img, show: show };
   }
 
+  function setProgress(el, value, opts) {
+    opts = opts || {};
+    if (!el) { return null; }
+    value = Math.max(0, Math.min(100, value));
+    var dur = opts.duration != null ? opts.duration : 500;
+    var ease = typeof opts.ease === 'function' ? opts.ease : function (p) { return 1 - Math.pow(1 - p, 3); };
+    var isRing = el.tagName && el.tagName.toLowerCase() === 'circle';
+    var from = el.__mvProgress != null ? el.__mvProgress : 0;
+    function apply(v) {
+      if (isRing) {
+        var len = parseFloat(el.getAttribute('data-pathlength') || '100');
+        el.style.strokeDashoffset = String((1 - v / 100) * len);
+      } else {
+        el.style.transform = 'scaleX(' + (v / 100) + ')';
+        el.style.webkitTransform = 'scaleX(' + (v / 100) + ')';
+      }
+      el.__mvProgress = v;
+    }
+    if (reduced()) {
+      apply(value);
+      return null;
+    }
+    apply(from);
+    return _tween(dur, function (p) {
+      apply(from + (value - from) * ease(p));
+    }, function () {
+      apply(value);
+      if (opts.onDone) { opts.onDone(value); }
+    });
+  }
+
   function revealOn(targets, opts) {
     opts = opts || {};
     var els = [];
@@ -1652,6 +1683,7 @@
     revealOn: revealOn,
     setStackLimit: setStackLimit,
     popover: popover,
-    imageReveal: imageReveal
+    imageReveal: imageReveal,
+    setProgress: setProgress
   };
 });

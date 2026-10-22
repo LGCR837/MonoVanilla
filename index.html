@@ -751,6 +751,26 @@
       <p class="note">MVAnim.popover(anchor, content, opts)：带方向箭头的浮动面板，自动上下翻转 + 水平居中 + 边缘夹取；点外部 / Esc 关闭，返回 { open, close, toggle, isOpen }。MVAnim.imageReveal(img, opts)：图片 onload（或已 complete）时做 opacity + 背景模糊的渐显，reduced-motion 下直接显示。opts：gap / zIndex / content（字符串或元素）/ duration / blur。</p>
     </div>
 
+    <!-- 19. 进度条 setProgress -->
+    <div class="card">
+      <h2>19. 进度条 / 环 · setProgress（命令式）</h2>
+      <div class="row">
+        <div class="pgr-track" style="flex:1 1 auto; min-width:0; margin-right:16px"><span class="pgr-fill" id="pgrBar"></span></div>
+        <svg class="pgr-ring" width="56" height="56" viewBox="0 0 56 56" aria-hidden="true">
+          <circle cx="28" cy="28" r="24" stroke="#e4e4e7" stroke-width="6"></circle>
+          <circle id="pgrRing" cx="28" cy="28" r="24" stroke="#818cf8" stroke-width="6" stroke-linecap="round"
+            stroke-dasharray="100" stroke-dashoffset="100" data-pathlength="100" pathLength="100"></circle>
+        </svg>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="pgr40">40%</button>
+        <button class="btn" id="pgr70">70%</button>
+        <button class="btn" id="pgr100">100%</button>
+        <span class="note" style="margin:0">同一 setProgress 驱动条形（scaleX）与圆环（stroke-dashoffset）</span>
+      </div>
+      <p class="note">MVAnim.setProgress(el, value, opts)：value 0–100。普通元素按 scaleX 填进度条；&lt;circle data-pathlength&gt; 圆环按 stroke-dashoffset 走线；reduced-motion 直接到位。返回 { cancel }；从上一次显示值补间到目标。</p>
+    </div>
+
     <p class="note">MVAnim.hasAnimate() = <span id="waapi">-</span> / MVAnim.reduced() = <span id="reduced">-</span></p>
  </div>
 
@@ -1265,6 +1285,19 @@
         MVAnim.imageReveal(img, { duration: 500, blur: 8 });
       };
     }
+  })();
+
+  /* 19. 进度条 / 环 setProgress */
+  (function () {
+    var bar = $('pgrBar'), ring = $('pgrRing');
+    function set(v) {
+      if (bar) { MVAnim.setProgress(bar, v, { duration: 600 }); }
+      if (ring) { MVAnim.setProgress(ring, v, { duration: 600 }); }
+    }
+    if ($('pgr40')) { $('pgr40').onclick = function () { set(40); }; }
+    if ($('pgr70')) { $('pgr70').onclick = function () { set(70); }; }
+    if ($('pgr100')) { $('pgr100').onclick = function () { set(100); }; }
+    set(0);
   })();
 })();
 </script>
