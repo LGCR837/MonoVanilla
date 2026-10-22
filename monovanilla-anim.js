@@ -41,6 +41,11 @@
   var EASE_SWIFT = 'cubic-bezier(.16, 1, .3, 1)';
   var EASE_SPRING = 'cubic-bezier(.34, 1.56, .64, 1)';
 
+  var tokens = {
+    ease: { swift: EASE_SWIFT, spring: EASE_SPRING, linear: 'linear' },
+    duration: { fast: 180, base: 400, slow: 640, count: 800 }
+  };
+
   function _tween(duration, onFrame, onDone) {
     var start = _now();
     var id;
@@ -1253,6 +1258,50 @@
     } };
   }
 
+  function sequence(steps, opts) {
+    opts = opts || {};
+    var i = 0;
+    var cancelled = false;
+    var timer = null;
+    var len = steps && steps.length;
+    function advance() {
+      if (cancelled) { return; }
+      if (i >= len) { if (opts.onDone) { opts.onDone(); } return; }
+      var s = steps[i++];
+      if (typeof s === 'number') {
+        timer = setTimeout(advance, s);
+        return;
+      }
+      if (typeof s === 'function') {
+        var called = false;
+        var r;
+        try {
+          r = s(function (extra) {
+            if (called) { return; }
+            called = true;
+            if (typeof extra === 'number') { timer = setTimeout(advance, extra); }
+            else { advance(); }
+          });
+        } catch (e) {
+          r = 0;
+        }
+        if (!called) {
+          if (typeof r === 'number') { timer = setTimeout(advance, r); }
+          else { advance(); }
+        }
+        return;
+      }
+      advance();
+    }
+    advance();
+    return {
+      cancel: function () {
+        cancelled = true;
+        if (timer) { clearTimeout(timer); }
+      }
+    };
+  }
+
   var _SVG_NS = 'http://www.w3.org/2000/svg';
   var _ICON_PATHS = {
     info: [
@@ -1451,6 +1500,8 @@
     slideTo: slideTo,
     translateX: translateX,
     countTo: countTo,
+    sequence: sequence,
+    tokens: tokens,
     reveal: reveal,
     reduced: reduced,
     hasAnimate: hasAnimate,

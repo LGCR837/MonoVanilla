@@ -720,6 +720,21 @@
       <p class="note">MVAnim.countTo(el, to, opts)：把文本从起始值补间到目标值（默认 easeOutCubic），支持 from / duration / decimals / prefix / suffix / ease / onDone；reduced-motion 下直接落到终值，返回 { cancel }。</p>
     </div>
 
+    <!-- 17. 编排 sequence -->
+    <div class="card">
+      <h2>17. 编排 · sequence（命令式）</h2>
+      <div class="row" id="seqSteps">
+        <div class="seq-step" data-i="0">准备</div>
+        <div class="seq-step" data-i="1">构建</div>
+        <div class="seq-step" data-i="2">测试</div>
+        <div class="seq-step" data-i="3">发布</div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn btn-dark" id="seqBtn">运行流水线</button>
+      </div>
+      <p class="note">MVAnim.sequence(steps, opts)：按序执行动画步骤。步骤可以是 number（等待毫秒）、function(next)（调用 next 推进，或返回数字表示等待），便于把多段动效编排成流水线；返回 { cancel() }。配合 MVAnim.tokens（ease / duration）可统一节奏。</p>
+    </div>
+
     <p class="note">MVAnim.hasAnimate() = <span id="waapi">-</span> / MVAnim.reduced() = <span id="reduced">-</span></p>
  </div>
 
@@ -1193,6 +1208,25 @@
     }
     if ($('countBtn')) { $('countBtn').onclick = run; }
     run();
+  })();
+
+  /* 17. 编排 sequence */
+  (function () {
+    var steps = document.querySelectorAll('#seqSteps .seq-step');
+    if (!$('seqBtn') || !steps.length) { return; }
+    function mark(i, on) {
+      for (var k = 0; k < steps.length; k++) { steps[k].className = 'seq-step' + (k === i && on ? ' on' : (k < i ? ' done' : '')); }
+    }
+    $('seqBtn').onclick = function () {
+      mark(-1, false);
+      MVAnim.sequence([
+        function (next) { mark(0, true); setTimeout(next, 620); },
+        function (next) { mark(1, true); setTimeout(next, 620); },
+        function (next) { mark(2, true); setTimeout(next, 620); },
+        200,
+        function () { mark(3, true); MVAnim.message({ type: 'success', text: '流水线完成：发布成功' }); setTimeout(function () { mark(-1, false); }, 700); }
+      ], {});
+    };
   })();
 })();
 </script>
