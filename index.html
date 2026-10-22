@@ -735,6 +735,22 @@
       <p class="note">MVAnim.sequence(steps, opts)：按序执行动画步骤。步骤可以是 number（等待毫秒）、function(next)（调用 next 推进，或返回数字表示等待），便于把多段动效编排成流水线；返回 { cancel() }。配合 MVAnim.tokens（ease / duration）可统一节奏。</p>
     </div>
 
+    <!-- 18. Popover + 图片渐显 -->
+    <div class="card">
+      <h2>18. 组件级 · Popover / 图片渐显</h2>
+      <div class="row">
+        <button class="btn btn-dark" id="popBtn">弹出 Popover</button>
+        <span class="note" style="margin:0">带箭头、自动上下翻转、点外部 / Esc 关闭</span>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <div class="imager-box">
+          <img id="lazyImg" alt="占位图">
+        </div>
+        <button class="btn" id="imgBtn">加载图片渐显</button>
+      </div>
+      <p class="note">MVAnim.popover(anchor, content, opts)：带方向箭头的浮动面板，自动上下翻转 + 水平居中 + 边缘夹取；点外部 / Esc 关闭，返回 { open, close, toggle, isOpen }。MVAnim.imageReveal(img, opts)：图片 onload（或已 complete）时做 opacity + 背景模糊的渐显，reduced-motion 下直接显示。opts：gap / zIndex / content（字符串或元素）/ duration / blur。</p>
+    </div>
+
     <p class="note">MVAnim.hasAnimate() = <span id="waapi">-</span> / MVAnim.reduced() = <span id="reduced">-</span></p>
  </div>
 
@@ -1227,6 +1243,28 @@
         function () { mark(3, true); MVAnim.message({ type: 'success', text: '流水线完成：发布成功' }); setTimeout(function () { mark(-1, false); }, 700); }
       ], {});
     };
+  })();
+
+  /* 18. Popover + 图片渐显 */
+  (function () {
+    var popBtn = $('popBtn');
+    if (popBtn) {
+      var pop = MVAnim.popover(popBtn, '这是一个带箭头的浮层：视口放不下会自动翻到上方，靠近边缘时被夹住。', { gap: 8 });
+      popBtn.onclick = function (e) { e.stopPropagation(); pop.toggle(); };
+    }
+    var img = $('lazyImg');
+    var grad = "data:image/svg+xml;utf8," + encodeURIComponent(
+      "<svg xmlns='http://www.w3.org/2000/svg' width='160' height='96'>" +
+      "<defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>" +
+      "<stop offset='0' stop-color='#818cf8'/><stop offset='1' stop-color='#34d399'/></linearGradient></defs>" +
+      "<rect width='160' height='96' fill='url(#g)'/></svg>");
+    if (img && $('imgBtn')) {
+      $('imgBtn').onclick = function () {
+        img.removeAttribute('src');
+        img.src = grad;
+        MVAnim.imageReveal(img, { duration: 500, blur: 8 });
+      };
+    }
   })();
 })();
 </script>

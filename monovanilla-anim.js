@@ -417,6 +417,11 @@
       from: { opacity: '0' },
       to: { opacity: '0' }
     },
+    'popover': {
+      dur: 200, ease: EASE_SWIFT,
+      from: { opacity: '0', filter: 'blur(6px)', transform: 'scale(0.94)' },
+      to: { opacity: '0', filter: 'blur(6px)', transform: 'scale(0.94)' }
+    },
     'message-flip': {
       from: { opacity: '0', filter: 'blur(15px)', transform: 'translateY(-20px) scale(0.5)' },
       to: { opacity: '0', filter: 'blur(10px)', transform: 'translateY(-15px) scale(0)' }
@@ -1193,6 +1198,125 @@
     return { el: el, close: close, reposition: place };
   }
 
+  function popover(anchor, content, opts) {
+    opts = opts || {};
+    var openFlag = false;
+    var onDoc = null;
+    var onKey = null;
+    var el = null;
+    function noop() {}
+    if (!anchor) { return { open: noop, close: noop, toggle: noop, isOpen: function () { return false; } }; }
+    function unbind() {
+      if (onDoc) { document.removeEventListener('click', onDoc, true); onDoc = null; }
+      if (onKey) { document.removeEventListener('keydown', onKey, true); onKey = null; }
+    }
+    function bind() {
+      if (opts.closeOnOutside === false) { return; }
+      onDoc = function (e) {
+        if (!openFlag) { return; }
+        var t = e.target;
+        if (el && (el === t || (el.contains && el.contains(t)))) { return; }
+        if (anchor === t || (anchor.contains && anchor.contains(t))) { return; }
+        close();
+      };
+      onKey = function (e) {
+        var k = e.keyCode || e.which;
+        if (k === 27) { close(); }
+      };
+      document.addEventListener('click', onDoc, true);
+      document.addEventListener('keydown', onKey, true);
+    }
+    function open() {
+      if (openFlag) { return; }
+      openFlag = true;
+      el = document.createElement('div');
+      el.className = 'mv-popover';
+      el.setAttribute('role', 'dialog');
+      el.setAttribute('aria-hidden', 'true');
+      var arrow = document.createElement('div');
+      arrow.className = 'mv-popover-arrow';
+      el.appendChild(arrow);
+      if (typeof content === 'string') {
+        var node = document.createElement('div');
+        node.className = 'mv-popover-body';
+        node.appendChild(document.createTextNode(content));
+        el.appendChild(node);
+      } else if (content && content.nodeType === 1) {
+        el.appendChild(content);
+      }
+      if (opts.zIndex != null) { el.style.zIndex = String(opts.zIndex); }
+      document.body.appendChild(el);
+      _popPosition(anchor, el, opts.gap);
+      el.style.transformOrigin = el.getAttribute('data-place') === 'top' ? '50% 100%' : '50% 0';
+      el.setAttribute('aria-hidden', 'false');
+      overlayEnter(el, 'popover');
+      bind();
+      if (opts.onOpen) { opts.onOpen(el); }
+    }
+    function close() {
+      if (!openFlag) { return; }
+      openFlag = false;
+      unbind();
+      var target = el;
+      el = null;
+      if (!target) { return; }
+      target.setAttribute('aria-hidden', 'true');
+      overlayLeave(target, 'popover', function () {
+        if (target.parentNode) { target.parentNode.removeChild(target); }
+        if (opts.onClose) { opts.onClose(target); }
+      });
+    }
+    function toggle() { if (openFlag) { close(); } else { open(); } }
+    return {
+      open: open, close: close, toggle: toggle,
+      isOpen: function () { return openFlag; }
+    };
+  }
+
+  function imageReveal(img, opts) {
+    opts = opts || {};
+    if (!img) { return null; }
+    var dur = opts.duration != null ? opts.duration : 500;
+    var blur = opts.blur != null ? opts.blur : 8;
+    var ease = opts.easing || EASE_SWIFT;
+    function setStyle(o, f) {
+      img.style.opacity = o;
+      if (f == null) {
+        img.style.filter = '';
+        img.style.webkitFilter = '';
+      } else {
+        img.style.filter = f;
+        img.style.webkitFilter = f;
+      }
+    }
+    function show() {
+      if (reduced()) { setStyle('1', null); if (opts.onShown) { opts.onShown(img); } return; }
+      setStyle('0', 'blur(' + blur + 'px)');
+      img.style.transition = 'none';
+      img.style.webkitTransition = 'none';
+      img.offsetWidth;
+      img.style.transition = 'opacity ' + dur + 'ms ' + ease + ', filter ' + dur + 'ms ' + ease;
+      img.style.webkitTransition = '-webkit-opacity ' + dur + 'ms ' + ease + ', -webkit-filter ' + dur + 'ms ' + ease;
+      setStyle('1', null);
+      setTimeout(function () {
+        img.style.transition = '';
+        img.style.webkitTransition = '';
+        img.style.filter = '';
+        img.style.webkitFilter = '';
+        if (opts.onShown) { opts.onShown(img); }
+      }, dur + 40);
+    }
+    if (img.complete && img.naturalWidth > 0) {
+      show();
+      return { el: img, show: show };
+    }
+    var done = false;
+    function onLoad() { if (done) { return; } done = true; show(); }
+    img.addEventListener('load', onLoad, false);
+    img.addEventListener('error', onLoad, false);
+    return { el: img, show: show };
+  }
+
   function revealOn(targets, opts) {
     opts = opts || {};
     var els = [];
@@ -1526,6 +1650,8 @@
     carouselTo: carouselTo,
     spotlight: spotlight,
     revealOn: revealOn,
-    setStackLimit: setStackLimit
+    setStackLimit: setStackLimit,
+    popover: popover,
+    imageReveal: imageReveal
   };
 });
