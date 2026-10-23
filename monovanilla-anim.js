@@ -1348,6 +1348,101 @@
     });
   }
 
+  function _transitionProps(el, from, to, opts) {
+    opts = opts || {};
+    if (!el) { return { cancel: function () { } }; }
+    var dur = opts.duration != null ? opts.duration : 400;
+    var ease = opts.easing || EASE_SWIFT;
+    var uniq = [];
+    function collect(s) {
+      for (var k in s) {
+        if (s.hasOwnProperty(k) && uniq.indexOf(k) === -1) { uniq.push(k); }
+      }
+    }
+    collect(from);
+    collect(to);
+    function apply(state) {
+      for (var k in state) {
+        if (state.hasOwnProperty(k)) {
+          el.style[k] = state[k];
+          if (k === 'transform') { el.style.webkitTransform = state[k]; }
+          if (k === 'filter') { el.style.webkitFilter = state[k]; }
+        }
+      }
+    }
+    function clearProps() {
+      el.style.transition = '';
+      el.style.webkitTransition = '';
+    }
+    var list = [];
+    for (var m = 0; m < uniq.length; m++) {
+      var pname = uniq[m];
+      list.push(pname + ' ' + dur + 'ms ' + ease);
+      if (pname === 'transform') { list.push('-webkit-transform ' + dur + 'ms ' + ease); }
+      if (pname === 'filter') { list.push('-webkit-filter ' + dur + 'ms ' + ease); }
+    }
+    var transitionStr = list.join(', ');
+    var timer = null;
+    var done = false;
+    function finish() {
+      if (done) { return; }
+      done = true;
+      if (timer) { clearTimeout(timer); timer = null; }
+      clearProps();
+      if (opts.onDone) { opts.onDone(el); }
+    }
+    if (reduced()) {
+      apply(to);
+      clearProps();
+      if (opts.onDone) { opts.onDone(el); }
+      return { cancel: function () { } };
+    }
+    el.style.transition = 'none';
+    el.style.webkitTransition = 'none';
+    apply(from);
+    el.offsetWidth;
+    el.style.transition = transitionStr;
+    el.style.webkitTransition = transitionStr;
+    apply(to);
+    timer = setTimeout(finish, dur + 40);
+    return {
+      cancel: function () {
+        if (done) { return; }
+        finish();
+      }
+    };
+  }
+
+  function fadeIn(el, opts) {
+    opts = opts || {};
+    var from = { opacity: 0 };
+    if (opts.scale != null) { from.transform = 'scale(' + opts.scale + ')'; }
+    else if (opts.translateY) { from.transform = 'translateY(' + opts.translateY + 'px)'; }
+    else { from.transform = 'translateY(0px)'; }
+    return _transitionProps(el, from, { opacity: 1, transform: 'translateY(0px)' }, opts);
+  }
+
+  function fadeOut(el, opts) {
+    opts = opts || {};
+    var to = { opacity: 0 };
+    if (opts.scale != null) { to.transform = 'scale(' + opts.scale + ')'; }
+    else if (opts.translateY) { to.transform = 'translateY(' + opts.translateY + 'px)'; }
+    else { to.transform = 'translateY(0px)'; }
+    return _transitionProps(el, { opacity: 1, transform: 'translateY(0px)' }, to, opts);
+  }
+
+  function slideUp(el, opts) {
+    opts = opts || {};
+    var y = opts.distance != null ? opts.distance : 16;
+    return _transitionProps(el, { opacity: 0, transform: 'translateY(' + y + 'px)' }, { opacity: 1, transform: 'translateY(0px)' }, opts);
+  }
+
+  function slideDown(el, opts) {
+    opts = opts || {};
+    var y = opts.distance != null ? opts.distance : 16;
+    return _transitionProps(el, { opacity: 1, transform: 'translateY(0px)' }, { opacity: 0, transform: 'translateY(-' + y + 'px)' }, opts);
+  }
+
   function revealOn(targets, opts) {
     opts = opts || {};
     var els = [];
@@ -1684,6 +1779,10 @@
     setStackLimit: setStackLimit,
     popover: popover,
     imageReveal: imageReveal,
-    setProgress: setProgress
+    setProgress: setProgress,
+    fadeIn: fadeIn,
+    fadeOut: fadeOut,
+    slideUp: slideUp,
+    slideDown: slideDown
   };
 });

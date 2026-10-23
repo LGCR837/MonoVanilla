@@ -771,6 +771,25 @@
       <p class="note">MVAnim.setProgress(el, value, opts)：value 0–100。普通元素按 scaleX 填进度条；&lt;circle data-pathlength&gt; 圆环按 stroke-dashoffset 走线；reduced-motion 直接到位。返回 { cancel }；从上一次显示值补间到目标。</p>
     </div>
 
+    <!-- 20. 通用过渡 fadeIn/fadeOut/slideUp/slideDown -->
+    <div class="card">
+      <h2>20. 通用过渡 · fadeIn / fadeOut / slideUp / slideDown</h2>
+      <div class="row">
+        <div class="gen-box" id="genBox">
+          <div class="gen-box-title">卡片</div>
+          <div class="gen-box-text">可对任意元素做淡入 / 淡出 / 上滑 / 下滑，无需命名 CSS 状态。</div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="genFadeIn">fadeIn</button>
+        <button class="btn" id="genFadeOut">fadeOut</button>
+        <button class="btn" id="genSlideUp">slideUp</button>
+        <button class="btn" id="genSlideDown">slideDown</button>
+        <button class="btn btn-dark" id="genReset">复位</button>
+      </div>
+      <p class="note">MVAnim.fadeIn / fadeOut / slideUp / slideDown(el, opts)：基于内联 transition 的通用进出场（Chrome 38 可用，不依赖命名 CSS 状态）。opts：duration / easing / translateY / scale / distance / onDone；返回 { cancel() }。</p>
+    </div>
+
     <p class="note">MVAnim.hasAnimate() = <span id="waapi">-</span> / MVAnim.reduced() = <span id="reduced">-</span></p>
  </div>
 
@@ -1298,6 +1317,18 @@
     if ($('pgr70')) { $('pgr70').onclick = function () { set(70); }; }
     if ($('pgr100')) { $('pgr100').onclick = function () { set(100); }; }
     set(0);
+  })();
+
+  /* 20. 通用过渡 fadeIn/fadeOut/slideUp/slideDown */
+  (function () {
+    var box = $('genBox');
+    if (!box) { return; }
+    function reset() { box.style.opacity = ''; box.style.transform = ''; box.style.display = ''; box.style.visibility = ''; }
+    if ($('genReset')) { $('genReset').onclick = function () { reset(); MVAnim.fadeIn(box, { duration: 260 }); }; }
+    if ($('genFadeIn')) { $('genFadeIn').onclick = function () { box.style.opacity = '0'; MVAnim.fadeIn(box, { translateY: 12, duration: 400 }); }; }
+    if ($('genFadeOut')) { $('genFadeOut').onclick = function () { MVAnim.fadeOut(box, { translateY: -12, duration: 400 }); }; }
+    if ($('genSlideUp')) { $('genSlideUp').onclick = function () { box.style.opacity = '0'; MVAnim.slideUp(box, { distance: 18, duration: 400 }); }; }
+    if ($('genSlideDown')) { $('genSlideDown').onclick = function () { MVAnim.slideDown(box, { distance: 18, duration: 400 }); }; }
   })();
 })();
 </script>
