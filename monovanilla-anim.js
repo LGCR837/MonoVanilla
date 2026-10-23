@@ -24,13 +24,22 @@
     return (win.performance && win.performance.now) ? win.performance.now() : Date.now();
   }
 
+  var _reducedOverride = null;
   function reduced() {
+    if (_reducedOverride != null) { return _reducedOverride; }
     try {
       return !!(win.matchMedia && win.matchMedia('(prefers-reduced-motion: reduce)').matches);
     } catch (e) {
       return false;
     }
   }
+
+  function setReduced(value) {
+    _reducedOverride = (value === null || value === undefined) ? null : (value ? true : false);
+    return reduced();
+  }
+
+  function isReduced() { return reduced(); }
 
   function hasAnimate() {
     return typeof Element !== 'undefined' &&
@@ -1754,6 +1763,8 @@
     tokens: tokens,
     reveal: reveal,
     reduced: reduced,
+    setReduced: setReduced,
+    isReduced: isReduced,
     hasAnimate: hasAnimate,
     overlayEnter: overlayEnter,
     overlayLeave: overlayLeave,
