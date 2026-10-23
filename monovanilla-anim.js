@@ -1611,6 +1611,64 @@
     } };
   }
 
+  function watchReducedMotion(cb) {
+    var mql = null;
+    try { mql = win.matchMedia && win.matchMedia('(prefers-reduced-motion: reduce)'); } catch (e) { mql = null; }
+    if (!mql) {
+      return { matches: function () { return reduced(); }, disconnect: function () { } };
+    }
+    var handler = function (evt) { if (typeof cb === 'function') { cb(evt && evt.matches !== undefined ? evt.matches : mql.matches); } };
+    if (mql.addEventListener) { mql.addEventListener('change', handler, false); }
+    else if (mql.addListener) { mql.addListener(handler); }
+    return {
+      matches: function () { return mql.matches; },
+      disconnect: function () {
+        if (mql.removeEventListener) { mql.removeEventListener('change', handler, false); }
+        else if (mql.removeListener) { mql.removeListener(handler); }
+      }
+    };
+  }
+
+  function hoverLift(el, opts) {
+    opts = opts || {};
+    if (!el) { return { lift: function () { }, release: function () { }, unbind: function () { } }; }
+    var liftY = opts.distance != null ? opts.distance : -3;
+    var shadow = opts.shadow != null ? opts.shadow : '0 8px 24px rgba(0, 0, 0, .14)';
+    var dur = opts.duration != null ? opts.duration : 200;
+    var ease = opts.easing || EASE_SWIFT;
+    function set(on) {
+      el.style.transition = 'transform ' + dur + 'ms ' + ease + ', box-shadow ' + dur + 'ms ' + ease;
+      el.style.webkitTransition = '-webkit-transform ' + dur + 'ms ' + ease + ', -webkit-box-shadow ' + dur + 'ms ' + ease;
+      if (on) {
+        el.style.transform = 'translateY(' + liftY + 'px)';
+        el.style.webkitTransform = 'translateY(' + liftY + 'px)';
+        el.style.boxShadow = shadow;
+        el.style.webkitBoxShadow = shadow;
+      } else {
+        el.style.transform = '';
+        el.style.webkitTransform = '';
+        el.style.boxShadow = '';
+        el.style.webkitBoxShadow = '';
+      }
+    }
+    var onEnter = function () { set(true); };
+    var onLeave = function () { set(false); };
+    el.addEventListener('mouseenter', onEnter, false);
+    el.addEventListener('mouseleave', onLeave, false);
+    el.addEventListener('focus', onEnter, false);
+    el.addEventListener('blur', onLeave, false);
+    return {
+      lift: function () { set(true); },
+      release: function () { set(false); },
+      unbind: function () {
+        el.removeEventListener('mouseenter', onEnter, false);
+        el.removeEventListener('mouseleave', onLeave, false);
+        el.removeEventListener('focus', onEnter, false);
+        el.removeEventListener('blur', onLeave, false);
+      }
+    };
+  }
+
   function revealOn(targets, opts) {
     opts = opts || {};
     var els = [];
@@ -1955,6 +2013,8 @@
     slideUp: slideUp,
     slideDown: slideDown,
     accordion: accordion,
-    scrollSpy: scrollSpy
+    scrollSpy: scrollSpy,
+    watchReducedMotion: watchReducedMotion,
+    hoverLift: hoverLift
   };
 });

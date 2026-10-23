@@ -835,6 +835,22 @@
       <p class="note">MVAnim.scrollSpy(nav, sections, opts)：观察 sections、按视口位置高亮 nav 中 data-target 对应项；opts：root（可滚动容器）/ rootMargin / threshold / className（默认 'on'）/ onEnter；返回 { disconnect() }。</p>
     </div>
 
+    <!-- 23. 微交互 + 无障碍观察 -->
+    <div class="card">
+      <h2>23. 微交互 · hoverLift / 无障碍观察</h2>
+      <div class="row">
+        <div class="lift-card" id="liftCard" tabindex="0">
+          <div class="lift-card-t">悬停 / 聚焦我</div>
+          <div class="lift-card-s">上移 + 投影微交互</div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="rmToggle">强制 reduced-motion</button>
+        <span class="note" style="margin:0">当前 reduced = <b id="rmState">auto</b></span>
+      </div>
+      <p class="note">MVAnim.hoverLift(el, opts)：mouseenter / focus 上移 + 投影，mouseleave / blur 复位，返回 { lift, release, unbind }。MVAnim.watchReducedMotion(cb)：监听系统 reduced-motion 变化；配合 setReduced(true|false|null) 手动强制或恢复自动。opts：distance / shadow / duration / easing。</p>
+    </div>
+
     <p class="note">MVAnim.hasAnimate() = <span id="waapi">-</span> / MVAnim.reduced() = <span id="reduced">-</span></p>
  </div>
 
@@ -1399,6 +1415,24 @@
       if (s) { secEls.push(s); }
     }
     if (secEls.length) { MVAnim.scrollSpy(links, secEls, { root: body, className: 'on' }); }
+  })();
+
+  /* 23. 微交互 + 无障碍观察 */
+  (function () {
+    var card = $('liftCard');
+    if (card) { MVAnim.hoverLift(card, { distance: -4, shadow: '0 12px 32px rgba(9, 9, 11, .18)', duration: 220 }); }
+    var rmBtn = $('rmToggle'), rmState = $('rmState');
+    if (rmBtn && rmState) {
+      var mode = 'auto';
+      function label() { rmState.innerHTML = mode === 'on' ? 'on（强制）' : ('auto（' + MVAnim.isReduced() + '）'); }
+      rmBtn.onclick = function () {
+        mode = mode === 'on' ? 'auto' : 'on';
+        MVAnim.setReduced(mode === 'on' ? true : null);
+        label();
+      };
+      label();
+      MVAnim.watchReducedMotion(function (m) { if (mode === 'auto') { rmState.innerHTML = 'auto（' + m + '）'; } });
+    }
   })();
 })();
 </script>
