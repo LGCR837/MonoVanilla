@@ -790,6 +790,51 @@
       <p class="note">MVAnim.fadeIn / fadeOut / slideUp / slideDown(el, opts)：基于内联 transition 的通用进出场（Chrome 38 可用，不依赖命名 CSS 状态）。opts：duration / easing / translateY / scale / distance / onDone；返回 { cancel() }。</p>
     </div>
 
+    <!-- 21. 折叠面板 accordion -->
+    <div class="card">
+      <h2>21. 折叠面板 · accordion（命令式）</h2>
+      <div class="acc" id="accBox">
+        <div class="acc-item">
+          <button class="acc-trigger" data-acc-trigger type="button">什么是 MVAnim？</button>
+          <div class="acc-panel" data-acc-panel>纯函数式动效系统：核心过渡、FLIP、命令式堆叠、组件级过渡，均 ES5 / Chrome 38 安全。</div>
+        </div>
+        <div class="acc-item">
+          <button class="acc-trigger" data-acc-trigger type="button">支持单开还是多开？</button>
+          <div class="acc-panel" data-acc-panel>默认单开（single），传 single:false 可让多个面板同时展开。</div>
+        </div>
+        <div class="acc-item">
+          <button class="acc-trigger" data-acc-trigger type="button">无障碍？</button>
+          <div class="acc-panel" data-acc-panel>触发器带 role=button / aria-expanded / aria-controls，面板 role=region / aria-hidden，支持键盘 Enter / 空格。</div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="accMulti">切多开模式</button>
+        <button class="btn" id="accSingle">切单开模式</button>
+        <button class="btn" id="accCloseAll">全部收起</button>
+      </div>
+      <p class="note">MVAnim.accordion(wrapper, opts)：管理 .acc-item（内含 [data-acc-trigger] 与 [data-acc-panel]），展开用内置 expand/collapse 高度补间 + ARIA 状态；opts：single（默认 true）/ duration / openFirst / onOpen / onClose。返回 { open, close, toggle, isOpen, items }。</p>
+    </div>
+
+    <!-- 22. 目录高亮 scrollSpy -->
+    <div class="card">
+      <h2>22. 目录高亮 · scrollSpy（命令式）</h2>
+      <div class="spy-wrap">
+        <nav class="spy-nav" id="spyNav" aria-label="目录">
+          <a href="#spy1" data-target="spy1">概览</a>
+          <a href="#spy2" data-target="spy2">架构</a>
+          <a href="#spy3" data-target="spy3">性能</a>
+          <a href="#spy4" data-target="spy4">部署</a>
+        </nav>
+        <div class="spy-body" id="spyBody">
+          <div class="spy-sec" id="spy1"><h4>概览</h4>向下滚动右侧内容，左侧目录随视口自动高亮。底层用 IntersectionObserver，Chrome 38 无 IO 时回退到 scroll + rAF。</div>
+          <div class="spy-sec" id="spy2"><h4>架构</h4>模块化的命令式 API，无构建、无框架依赖，可挂在任意元素上。每一段过渡都可插拔钩子。</div>
+          <div class="spy-sec" id="spy3"><h4>性能</h4>只动 transform / opacity / filter，优先合成层，避免触发布局重排。FLIP 与进度条都走 rAF 补间。</div>
+          <div class="spy-sec" id="spy4"><h4>部署</h4>拷贝 monovanilla-anim.js + monovanilla-animations.css 即可，暴露 window.MVAnim，按需在页面初始化时调用各能力。</div>
+        </div>
+      </div>
+      <p class="note">MVAnim.scrollSpy(nav, sections, opts)：观察 sections、按视口位置高亮 nav 中 data-target 对应项；opts：root（可滚动容器）/ rootMargin / threshold / className（默认 'on'）/ onEnter；返回 { disconnect() }。</p>
+    </div>
+
     <p class="note">MVAnim.hasAnimate() = <span id="waapi">-</span> / MVAnim.reduced() = <span id="reduced">-</span></p>
  </div>
 
@@ -1329,6 +1374,31 @@
     if ($('genFadeOut')) { $('genFadeOut').onclick = function () { MVAnim.fadeOut(box, { translateY: -12, duration: 400 }); }; }
     if ($('genSlideUp')) { $('genSlideUp').onclick = function () { box.style.opacity = '0'; MVAnim.slideUp(box, { distance: 18, duration: 400 }); }; }
     if ($('genSlideDown')) { $('genSlideDown').onclick = function () { MVAnim.slideDown(box, { distance: 18, duration: 400 }); }; }
+  })();
+
+  /* 21. 折叠面板 accordion */
+  (function () {
+    var acc = null;
+    function init(single) {
+      acc = MVAnim.accordion($('accBox'), { single: single, duration: 320, openFirst: true });
+    }
+    init(true);
+    if ($('accMulti')) { $('accMulti').onclick = function () { init(false); }; }
+    if ($('accSingle')) { $('accSingle').onclick = function () { init(true); }; }
+    if ($('accCloseAll')) { $('accCloseAll').onclick = function () { for (var i = 0; i < acc.items.length; i++) { acc.close(i); } }; }
+  })();
+
+  /* 22. 目录高亮 scrollSpy */
+  (function () {
+    var body = $('spyBody'), nav = $('spyNav');
+    if (!body || !nav) { return; }
+    var links = nav.querySelectorAll('a[data-target]');
+    var secEls = [];
+    for (var i = 0; i < links.length; i++) {
+      var s = document.getElementById(links[i].getAttribute('data-target'));
+      if (s) { secEls.push(s); }
+    }
+    if (secEls.length) { MVAnim.scrollSpy(links, secEls, { root: body, className: 'on' }); }
   })();
 })();
 </script>

@@ -1452,6 +1452,165 @@
     return _transitionProps(el, { opacity: 1, transform: 'translateY(0px)' }, { opacity: 0, transform: 'translateY(-' + y + 'px)' }, opts);
   }
 
+  function _toArray(nodes) {
+    var out = [];
+    if (!nodes) { return out; }
+    if (typeof nodes === 'string') {
+      var list = document.querySelectorAll(nodes);
+      for (var i = 0; i < list.length; i++) { out.push(list[i]); }
+    } else if (nodes.nodeType === 1) {
+      out.push(nodes);
+    } else if (nodes.length) {
+      for (var j = 0; j < nodes.length; j++) { out.push(nodes[j]); }
+    }
+    return out;
+  }
+
+  function accordion(wrapper, opts) {
+    opts = opts || {};
+    var single = opts.single !== false;
+    var dur = opts.duration;
+    var items = [];
+    var itemEls;
+    if (typeof wrapper === 'string') {
+      itemEls = _toArray(wrapper === '.acc-item' ? wrapper : wrapper + ' .acc-item, ' + wrapper);
+    } else {
+      var found = wrapper && wrapper.querySelectorAll ? wrapper.querySelectorAll('.acc-item') : null;
+      itemEls = (found && found.length) ? _toArray(found) : _toArray(wrapper);
+    }
+    for (var k = 0; k < itemEls.length; k++) {
+      var it = itemEls[k];
+      var trigger = it.querySelector('[data-acc-trigger]');
+      var panel = it.querySelector('[data-acc-panel]');
+      if (!trigger || !panel) { continue; }
+      if (!panel.id) { panel.id = 'acc-panel-' + k; }
+      if (!trigger.id) { trigger.id = 'acc-trigger-' + k; }
+      trigger.setAttribute('role', 'button');
+      trigger.setAttribute('tabindex', '0');
+      trigger.setAttribute('aria-expanded', 'false');
+      trigger.setAttribute('aria-controls', panel.id);
+      panel.setAttribute('role', 'region');
+      panel.setAttribute('aria-labelledby', trigger.id);
+      panel.setAttribute('aria-hidden', 'true');
+      panel.style.overflow = 'hidden';
+      panel.style.height = '0px';
+      panel.style.opacity = '0';
+      var item = { el: it, trigger: trigger, panel: panel, open: false, index: items.length };
+      items.push(item);
+      (function (idx) {
+        trigger.onclick = function () { doToggle(idx); };
+        trigger.onkeydown = function (e) {
+          var code = e.keyCode || e.which;
+          if (code === 13 || code === 32) { e.preventDefault(); doToggle(idx); }
+        };
+      })(item.index);
+    }
+    function setOpen(item, open) {
+      if (!item) { return; }
+      item.open = open;
+      item.trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      item.panel.setAttribute('aria-hidden', open ? 'false' : 'true');
+      if (open) { expand(item.panel, dur); } else { collapse(item.panel, dur); }
+    }
+    function doOpen(i) {
+      var it = items[i];
+      if (!it) { return; }
+      if (single) { for (var x = 0; x < items.length; x++) { if (items[x] !== it && items[x].open) { setOpen(items[x], false); } } }
+      setOpen(it, true);
+      if (opts.onOpen) { opts.onOpen(it); }
+    }
+    function doClose(i) {
+      var it = items[i];
+      if (!it || !it.open) { return; }
+      setOpen(it, false);
+      if (opts.onClose) { opts.onClose(it); }
+    }
+    function doToggle(i) {
+      var it = items[i];
+      if (!it) { return; }
+      if (it.open) { doClose(i); } else { doOpen(i); }
+    }
+    var api = {
+      open: doOpen,
+      close: doClose,
+      toggle: doToggle,
+      isOpen: function (i) { return items[i] ? items[i].open : false; },
+      items: items
+    };
+    if (opts.openFirst !== false && items.length) { doOpen(0); }
+    return api;
+  }
+
+  function scrollSpy(nav, sections, opts) {
+    opts = opts || {};
+    var cls = opts.className || 'on';
+    var root = opts.root || null;
+    var navItems = _toArray(nav);
+    var targetToItem = {};
+    for (var i = 0; i < navItems.length; i++) {
+      var t = navItems[i].getAttribute('data-target');
+      if (t) { targetToItem[t] = navItems[i]; }
+    }
+    var secArr = _toArray(sections);
+    function pick() {
+      var best = null;
+      var bestTop = Infinity;
+      for (var s = 0; s < secArr.length; s++) {
+        var el = secArr[s];
+        if (!el.id || !visible[el.id]) { continue; }
+        var top = el.getBoundingClientRect().top - (root ? root.getBoundingClientRect().top : 0);
+        if (top < bestTop) { bestTop = top; best = el; }
+      }
+      if (best) { set(best); }
+    }
+    function set(secEl) {
+      var id = secEl.id;
+      for (var key in targetToItem) {
+        if (!targetToItem.hasOwnProperty(key)) { continue; }
+        if (key === id) { _addClass(targetToItem[key], cls); }
+        else { _removeClass(targetToItem[key], cls); }
+      }
+      if (targetToItem[id] && opts.onEnter) { opts.onEnter(targetToItem[id], secEl); }
+    }
+    var visible = {};
+    if (typeof IntersectionObserver !== 'undefined') {
+      var io = new IntersectionObserver(function (entries) {
+        for (var e = 0; e < entries.length; e++) {
+          var el = entries[e].target;
+          if (el.id) { visible[el.id] = entries[e].isIntersecting; }
+        }
+        pick();
+      }, {
+        root: root,
+        rootMargin: opts.rootMargin || '-20% 0px -60% 0px',
+        threshold: opts.threshold != null ? opts.threshold : 0.2
+      });
+      for (var s = 0; s < secArr.length; s++) { io.observe(secArr[s]); }
+      return { disconnect: function () { io.disconnect(); } };
+    }
+    var ticking = false;
+    function check() {
+      ticking = false;
+      var band = root ? root.getBoundingClientRect() : { top: 0, bottom: win.innerHeight || document.documentElement.clientHeight };
+      for (var s = 0; s < secArr.length; s++) {
+        var el = secArr[s];
+        if (!el.id) { continue; }
+        var r = el.getBoundingClientRect();
+        visible[el.id] = r.bottom > band.top && r.top < band.bottom;
+      }
+      pick();
+    }
+    function onScroll() { if (!ticking) { ticking = true; raf(check); } }
+    var scroller = root || win;
+    scroller.addEventListener('scroll', onScroll, false);
+    scroller.addEventListener('resize', onScroll, false);
+    check();
+    return { disconnect: function () {
+      scroller.removeEventListener('scroll', onScroll, false);
+      scroller.removeEventListener('resize', onScroll, false);
+    } };
+  }
+
   function revealOn(targets, opts) {
     opts = opts || {};
     var els = [];
@@ -1794,6 +1953,8 @@
     fadeIn: fadeIn,
     fadeOut: fadeOut,
     slideUp: slideUp,
-    slideDown: slideDown
+    slideDown: slideDown,
+    accordion: accordion,
+    scrollSpy: scrollSpy
   };
 });
