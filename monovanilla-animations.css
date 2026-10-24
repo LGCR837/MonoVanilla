@@ -968,3 +968,9 @@
 .lift-card:focus { outline: none; }
 .lift-card-t { font-size: 14px; font-weight: 600; color: #09090b; color: var(--mv-fg, #09090b); }
 .lift-card-s { margin-top: 4px; font-size: 12px; color: #71717a; color: var(--mv-muted, #71717a); }
+
+.color-src { -webkit-box-flex: 0; -webkit-flex: 0 0 auto; flex: 0 0 auto; }
+.color-out { -webkit-box-flex: 1; -webkit-flex: 1 1 auto; flex: 1 1 auto; min-width: 0; }
+.color-swatch { width: 64px; height: 64px; border-radius: 12px; background: #e4e4e7; border: 1px solid rgba(0,0,0,.06); }
+.color-hex { margin-top: 8px; font-size: 12px; color: #71717a; color: var(--mv-muted, #71717a); font-family: monospace; }
+.color-alpha { height: 12px; border-radius: 6px; margin-top: 8px; background: #e4e4e7; border: 1px solid rgba(0,0,0,.06); }

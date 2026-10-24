@@ -851,6 +851,24 @@
       <p class="note">MVAnim.hoverLift(el, opts)：mouseenter / focus 上移 + 投影，mouseleave / blur 复位，返回 { lift, release, unbind }。MVAnim.watchReducedMotion(cb)：监听系统 reduced-motion 变化；配合 setReduced(true|false|null) 手动强制或恢复自动。opts：distance / shadow / duration / easing。</p>
     </div>
 
+    <!-- 24. 动态取色 -->
+    <div class="card">
+      <h2>24. 动态取色 · 颜色工具（命令式）</h2>
+      <div class="row">
+        <div class="color-src">
+          <img id="colorImg" alt="取色源" style="width:96px;height:96px;border-radius:10px;object-fit:cover;display:block">
+          <button class="btn btn-dark" id="colorBtn" style="margin-top:8px">提取主色</button>
+        </div>
+        <div class="color-out">
+          <div class="color-swatch" id="colorSwatch"></div>
+          <div class="color-hex" id="colorHex">-</div>
+          <div class="color-alpha" id="colorAlpha" title="withAlpha"></div>
+          <button class="btn" id="colorMix" style="margin-top:8px">混色 / 透明度预览</button>
+        </div>
+      </div>
+      <p class="note">MVAnim.dominantFromImage(img, opts)：canvas 采样，按饱和度加权返回 { hex, rgb }（数据 URI 无跨域限制）；colorOf(el, prop) 读取元素计算色；withAlpha(color, a) 生成 rgba；colorMix(a, b, t) 混色。可用图片主色驱动进度条 / 强调色等 UI。</p>
+    </div>
+
     <p class="note">MVAnim.hasAnimate() = <span id="waapi">-</span> / MVAnim.reduced() = <span id="reduced">-</span></p>
  </div>
 
@@ -1432,6 +1450,43 @@
       };
       label();
       MVAnim.watchReducedMotion(function (m) { if (mode === 'auto') { rmState.innerHTML = 'auto（' + m + '）'; } });
+    }
+  })();
+
+  /* 24. 动态取色 */
+  (function () {
+    var img = $('colorImg');
+    var sw = $('colorSwatch'), hex = $('colorHex'), alpha = $('colorAlpha');
+    if (img) {
+      img.src = "data:image/svg+xml;utf8," + encodeURIComponent(
+        "<svg xmlns='http://www.w3.org/2000/svg' width='96' height='96'>" +
+        "<defs><linearGradient id='c' x1='0' y1='0' x2='1' y2='1'>" +
+        "<stop offset='0' stop-color='#ff7849'/><stop offset='0.5' stop-color='#f43f5e'/>" +
+        "<stop offset='1' stop-color='#818cf8'/></linearGradient></defs>" +
+        "<rect width='96' height='96' fill='url(#c)'/></svg>");
+    }
+    var last = null;
+    function show(rgb) {
+      last = rgb;
+      if (sw) { sw.style.background = rgb; }
+      if (alpha) { alpha.style.background = MVAnim.withAlpha(rgb, 0.4); }
+    }
+    if ($('colorBtn') && img) {
+      $('colorBtn').onclick = function () {
+        var d = MVAnim.dominantFromImage(img, { preferVivid: 1 });
+        if (!d) { if (hex) { hex.textContent = '(取样失败)'; } return; }
+        show(d.rgb);
+        if (hex) { hex.textContent = d.hex + '  /  ' + d.rgb; }
+      };
+    }
+    if ($('colorMix')) {
+      $('colorMix').onclick = function () {
+        var a = last || '#f43f5e';
+        var mixed = MVAnim.colorMix(a, '#34d399', 0.5);
+        if (sw) { sw.style.background = mixed; }
+        if (alpha) { alpha.style.background = MVAnim.withAlpha(mixed, 0.4); }
+        if (hex) { hex.textContent = 'mix(' + a + ', #34d399) = ' + mixed; }
+      };
     }
   })();
 })();
