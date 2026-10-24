@@ -505,6 +505,92 @@
     };
   }
 
+  function slider(input, opts) {
+    opts = opts || {};
+    function noop() {}
+    if (!input) { return { set: noop, value: function () { return 0; } }; }
+    var min = input.min != null && input.min !== '' ? parseFloat(input.min) : 0;
+    var max = input.max != null && input.max !== '' ? parseFloat(input.max) : 100;
+    var fill = opts.fillColor || '#818cf8';
+    var track = opts.trackColor || '#e4e4e7';
+    function paint() {
+      var v = parseFloat(input.value);
+      var pct = (max - min) === 0 ? 0 : ((v - min) / (max - min)) * 100;
+      input.style.background = 'linear-gradient(90deg, ' + fill + ' 0%, ' + fill + ' ' + pct + '%, ' + track + ' ' + pct + '%, ' + track + ' 100%)';
+      if (opts.onInput) { opts.onInput(v); }
+    }
+    input.addEventListener('input', paint, false);
+    paint();
+    return {
+      set: function (v) {
+        input.value = v;
+        paint();
+        if (opts.onChange) { opts.onChange(parseFloat(input.value)); }
+        return parseFloat(input.value);
+      },
+      value: function () { return parseFloat(input.value); }
+    };
+  }
+
+  function rating(container, value, opts) {
+    opts = opts || {};
+    function noop() {}
+    if (!container) { return { set: noop, value: function () { return 0; } }; }
+    var stars = container.querySelectorAll('.rt-star');
+    var n = stars.length;
+    var cur = 0;
+    function paint(v, animateLast) {
+      cur = Math.max(0, Math.min(n, Math.round(v)));
+      for (var i = 0; i < stars.length; i++) { stars[i].className = 'rt-star' + (i < cur ? ' on' : ''); }
+      if (animateLast && cur > 0 && !reduced()) {
+        var st = stars[cur - 1];
+        st.style.transition = 'none';
+        st.style.webkitTransition = 'none';
+        st.style.transform = 'scale(0.6)';
+        st.style.webkitTransform = 'scale(0.6)';
+        st.offsetWidth;
+        st.style.transition = 'transform .32s ' + EASE_SPRING;
+        st.style.webkitTransition = '-webkit-transform .32s ' + EASE_SPRING;
+        st.style.transform = 'scale(1)';
+        st.style.webkitTransform = 'scale(1)';
+        setTimeout(function () { st.style.transition = ''; st.style.transform = ''; st.style.webkitTransform = ''; }, 360);
+      }
+    }
+    paint(value != null ? value : 0, value != null);
+    for (var i = 0; i < stars.length; i++) {
+      (function (idx) { stars[idx].onclick = function () { set(idx + 1); }; })(i);
+    }
+    function set(v) { paint(v, true); if (opts.onChange) { opts.onChange(cur); } return cur; }
+    return { set: set, value: function () { return cur; } };
+  }
+
+  function applyAccent(color, root) {
+    root = root || (document.documentElement || document.body);
+    var c = _parseColor(color);
+    if (!root || !root.style || !root.style.setProperty) { return null; }
+    root.style.setProperty('--mv-accent', c ? color : '');
+    root.style.setProperty('--mv-accent-soft', c ? withAlpha(color, 0.16) : '');
+    root.style.setProperty('--mv-accent-fg', c ? colorMix(color, '#ffffff', 0.55) : '');
+    root.style.setProperty('--mv-accent-ink', c ? colorMix(color, '#000000', 0.45) : '');
+    return { accent: c ? color : null, soft: c ? withAlpha(color, 0.16) : null };
+  }
+
+  function palette(base, opts) {
+    opts = opts || {};
+    var out = {};
+    var steps = opts.steps || [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
+    var anchor = opts.anchor != null ? opts.anchor : 500;
+    for (var i = 0; i < steps.length; i++) {
+      var s = steps[i];
+      var t = (s - anchor) / 1000;
+      if (t > 0) { out[s] = colorMix(base, '#ffffff', Math.min(1, t)); }
+      else if (t < 0) { out[s] = colorMix(base, '#000000', Math.min(1, -t)); }
+      else { out[s] = base; }
+    }
+    out.base = base;
+    return out;
+  }
+
   function reveal(el, open) {
     if (!el || !el.classList) { return; }
     if (open) { el.classList.add('mv-reveal-open'); }
@@ -2210,6 +2296,10 @@
     dominantFromImage: dominantFromImage,
     toggleSwitch: toggleSwitch,
     segmented: segmented,
-    stepper: stepper
+    stepper: stepper,
+    slider: slider,
+    rating: rating,
+    applyAccent: applyAccent,
+    palette: palette
   };
 });

@@ -896,6 +896,34 @@
       <p class="note">MVAnim.toggleSwitch(el, opts)：开关，thumb 位移 + 轨道色，返回 { set, toggle, checked }。MVAnim.segmented(container, index, opts)：分段控件，指示条平滑滑动到选中项，返回 index。MVAnim.stepper(wrapper, opts)：步进器，加减调用 countTo 补间数值，返回 { value, inc, dec, set }。均带 ARIA。</p>
     </div>
 
+    <!-- 26. slider / rating + 取色驱动强调色 / 色阶 -->
+    <div class="card">
+      <h2>26. 控件扩展 · slider / rating + 取色驱动强调色</h2>
+      <div class="row">
+        <input type="range" class="mv-slider" id="slider1" min="0" max="100" value="40">
+        <span class="note" style="margin:0">slider 值 = <b id="sliderVal">40</b></span>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <span class="rt" id="rate1">
+          <span class="rt-star">★</span><span class="rt-star">★</span><span class="rt-star">★</span><span class="rt-star">★</span><span class="rt-star">★</span>
+        </span>
+        <span class="note" style="margin:0">评分（点击，末颗弹性 pop）</span>
+      </div>
+
+      <div class="accent-panel" id="accPanel" style="margin-top:14px">
+        <div class="row">
+          <button class="acc-chip" id="accChip">强调色按钮</button>
+        </div>
+        <div class="acc-track"><span class="acc-fill"></span></div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn btn-dark" id="accBtn">用取色图片主色设强调色</button>
+          <button class="btn" id="palBtn">生成色阶（基于主色）</button>
+        </div>
+        <div class="pal-row" id="palRow"></div>
+      </div>
+      <p class="note">MVAnim.slider(input, opts)：range 填充渐变跟随值，返回 { set, value }。MVAnim.rating(container, value, opts)：评分，末颗星星弹性 pop，返回 { set, value }。MVAnim.applyAccent(color, root)：把颜色写入 --mv-accent / -soft / -fg / -ink 四个 CSS 变量驱动整片 UI 重新取色；可接 dominantFromImage。MVAnim.palette(base, opts)：基于基准色生成 50–900 色阶。</p>
+    </div>
+
     <p class="note">MVAnim.hasAnimate() = <span id="waapi">-</span> / MVAnim.reduced() = <span id="reduced">-</span></p>
  </div>
 
@@ -1534,6 +1562,44 @@
     }
     if ($('step1')) {
       MVAnim.stepper($('step1'), { min: 0, max: 9, step: 1 });
+    }
+  })();
+
+  /* 26. slider / rating + 取色驱动强调色 / 色阶 */
+  (function () {
+    if ($('slider1')) {
+      MVAnim.slider($('slider1'), {
+        fillColor: '#818cf8',
+        onInput: function (v) { if ($('sliderVal')) { $('sliderVal').innerHTML = Math.round(v); } }
+      });
+    }
+    if ($('rate1')) { MVAnim.rating($('rate1'), 3, {}); }
+
+    var accPanel = $('accPanel');
+    if ($('accBtn') && accPanel) {
+      $('accBtn').onclick = function () {
+        var img = $('colorImg');
+        var d = img ? MVAnim.dominantFromImage(img, { preferVivid: 1 }) : null;
+        var color = d ? d.rgb : '#818cf8';
+        MVAnim.applyAccent(color, accPanel);
+      };
+    }
+    if ($('palBtn') && $('palRow')) {
+      $('palBtn').onclick = function () {
+        var img = $('colorImg');
+        var d = img ? MVAnim.dominantFromImage(img, { preferVivid: 1 }) : null;
+        var base = d ? d.hex : '#818cf8';
+        var pal = MVAnim.palette(base, {});
+        var row = $('palRow');
+        while (row.firstChild) { row.removeChild(row.firstChild); }
+        var keys = ['50', '100', '300', '500', '700', '900'];
+        for (var i = 0; i < keys.length; i++) {
+          var cell = document.createElement('div');
+          cell.className = 'pal-cell';
+          cell.style.background = pal[keys[i]];
+          row.appendChild(cell);
+        }
+      };
     }
   })();
 })();
