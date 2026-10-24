@@ -869,6 +869,33 @@
       <p class="note">MVAnim.dominantFromImage(img, opts)：canvas 采样，按饱和度加权返回 { hex, rgb }（数据 URI 无跨域限制）；colorOf(el, prop) 读取元素计算色；withAlpha(color, a) 生成 rgba；colorMix(a, b, t) 混色。可用图片主色驱动进度条 / 强调色等 UI。</p>
     </div>
 
+    <!-- 25. 控件 · switch / segmented / stepper -->
+    <div class="card">
+      <h2>25. 控件 · Switch / Segmented / Stepper</h2>
+      <div class="row">
+        <label class="mv-switch" id="swt"><input type="checkbox" checked><span class="mv-switch-track"><span class="mv-switch-thumb"></span></span></label>
+        <span class="note" style="margin:0">开关（thumb 平移 + 轨道变色）</span>
+      </div>
+      <div class="row" style="margin-top:14px">
+        <div class="mv-seg" id="seg1">
+          <span class="mv-seg-ind"></span>
+          <button class="mv-seg-item on" type="button">日</button>
+          <button class="mv-seg-item" type="button">周</button>
+          <button class="mv-seg-item" type="button">月</button>
+        </div>
+        <span class="note" style="margin:0">分段控件（指示条滑动）</span>
+      </div>
+      <div class="row" style="margin-top:14px">
+        <div class="mv-step" id="step1">
+          <button class="mv-step-minus" type="button" aria-label="减">−</button>
+          <span class="mv-step-val">3</span>
+          <button class="mv-step-plus" type="button" aria-label="加">＋</button>
+        </div>
+        <span class="note" style="margin:0">步进器（数值滚动，min 0 / max 9）</span>
+      </div>
+      <p class="note">MVAnim.toggleSwitch(el, opts)：开关，thumb 位移 + 轨道色，返回 { set, toggle, checked }。MVAnim.segmented(container, index, opts)：分段控件，指示条平滑滑动到选中项，返回 index。MVAnim.stepper(wrapper, opts)：步进器，加减调用 countTo 补间数值，返回 { value, inc, dec, set }。均带 ARIA。</p>
+    </div>
+
     <p class="note">MVAnim.hasAnimate() = <span id="waapi">-</span> / MVAnim.reduced() = <span id="reduced">-</span></p>
  </div>
 
@@ -1487,6 +1514,26 @@
         if (alpha) { alpha.style.background = MVAnim.withAlpha(mixed, 0.4); }
         if (hex) { hex.textContent = 'mix(' + a + ', #34d399) = ' + mixed; }
       };
+    }
+  })();
+
+  /* 25. 控件: switch / segmented / stepper */
+  (function () {
+    if ($('swt')) {
+      MVAnim.toggleSwitch($('swt'), { onColor: '#818cf8', offColor: '#e4e4e7' });
+    }
+    var seg = $('seg1');
+    if (seg) {
+      MVAnim.segmented(seg, 0, {});
+      var segItems = seg.querySelectorAll('.mv-seg-item');
+      for (var i = 0; i < segItems.length; i++) {
+        (function (idx) {
+          segItems[idx].onclick = function () { MVAnim.segmented(seg, idx, {}); };
+        })(i);
+      }
+    }
+    if ($('step1')) {
+      MVAnim.stepper($('step1'), { min: 0, max: 9, step: 1 });
     }
   })();
 })();
