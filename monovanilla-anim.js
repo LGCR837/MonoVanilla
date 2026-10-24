@@ -317,87 +317,6 @@
     });
   }
 
-  function _parseColor(str) {
-    str = (str == null ? '' : String(str)).trim();
-    if (str.charAt(0) === '#') {
-      var h = str.slice(1);
-      if (h.length === 3) { h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2]; }
-      if (h.length !== 6) { return null; }
-      var n = parseInt(h, 16);
-      if (isNaN(n)) { return null; }
-      return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255, a: 1 };
-    }
-    var m = str.match(/rgba?\(([^)]+)\)/);
-    if (m) {
-      var p = m[1].split(',');
-      var r = parseInt(p[0], 10), g = parseInt(p[1], 10), bl = parseInt(p[2], 10);
-      if (isNaN(r) || isNaN(g) || isNaN(bl)) { return null; }
-      return { r: r, g: g, b: bl, a: p.length > 3 ? parseFloat(p[3]) : 1 };
-    }
-    return null;
-  }
-  function _c2h(v) { var s = v.toString(16); return s.length === 1 ? '0' + s : s; }
-  function colorOf(el, prop) {
-    if (!el || !getComputedStyle) { return null; }
-    var cs = getComputedStyle(el);
-    var val = '';
-    if (cs.getPropertyValue) { val = cs.getPropertyValue(prop); }
-    if (!val) { val = cs[prop] || ''; }
-    return val ? val : null;
-  }
-  function withAlpha(color, alpha) {
-    var c = _parseColor(color);
-    if (!c) { return color; }
-    c.a = alpha == null ? 1 : alpha;
-    return 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + c.a + ')';
-  }
-  function colorMix(a, b, t) {
-    var ca = _parseColor(a), cb = _parseColor(b);
-    if (!ca || !cb) { return a; }
-    t = t == null ? 0.5 : t;
-    var r = Math.round(ca.r + (cb.r - ca.r) * t);
-    var g = Math.round(ca.g + (cb.g - ca.g) * t);
-    var bl = Math.round(ca.b + (cb.b - ca.b) * t);
-    var al = ca.a + (cb.a - ca.a) * t;
-    return al < 1 ? 'rgba(' + r + ',' + g + ',' + bl + ',' + al + ')' : 'rgb(' + r + ',' + g + ',' + bl + ')';
-  }
-  function dominantFromImage(img, opts) {
-    opts = opts || {};
-    if (!img || !document.createElement) { return null; }
-    var size = opts.size != null ? opts.size : 24;
-    var canvas = document.createElement('canvas');
-    canvas.width = size;
-    canvas.height = size;
-    var ctx = canvas.getContext('2d');
-    if (!ctx) { return null; }
-    try { ctx.drawImage(img, 0, 0, size, size); } catch (e) { return null; }
-    var data;
-    try { data = ctx.getImageData(0, 0, size, size).data; } catch (e2) { return null; }
-    var sum = {}, cnt = {}, wt = {};
-    for (var i = 0; i < data.length; i += 4) {
-      var r = data[i], g = data[i + 1], b = data[i + 2];
-      var mx = Math.max(r, g, b), mn = Math.min(r, g, b);
-      var sat = mx === 0 ? 0 : (mx - mn) / mx;
-      var key = (Math.round(r / 32) * 32) + ',' + (Math.round(g / 32) * 32) + ',' + (Math.round(b / 32) * 32);
-      sum[key] = sum[key] || { r: 0, g: 0, b: 0 };
-      sum[key].r += r; sum[key].g += g; sum[key].b += b;
-      cnt[key] = (cnt[key] || 0) + 1;
-      var w = 0.2 + sat * (opts.preferVivid != null ? opts.preferVivid : 1);
-      wt[key] = (wt[key] || 0) + w;
-    }
-    var best = null, bestW = -1;
-    for (var k in wt) {
-      if (wt[k] > bestW) { bestW = wt[k]; best = k; }
-    }
-    if (!best) { return null; }
-    var n = cnt[best] || 1;
-    var pr = Math.round(sum[best].r / n), pg = Math.round(sum[best].g / n), pb = Math.round(sum[best].b / n);
-    return {
-      rgb: 'rgb(' + pr + ',' + pg + ',' + pb + ')',
-      hex: '#' + _c2h(pr) + _c2h(pg) + _c2h(pb)
-    };
-  }
-
   function toggleSwitch(control, opts) {
     opts = opts || {};
     function noop() {}
@@ -503,92 +422,6 @@
       dec: function () { return set(cur - step, true); },
       set: function (v) { return set(v, true); }
     };
-  }
-
-  function slider(input, opts) {
-    opts = opts || {};
-    function noop() {}
-    if (!input) { return { set: noop, value: function () { return 0; } }; }
-    var min = input.min != null && input.min !== '' ? parseFloat(input.min) : 0;
-    var max = input.max != null && input.max !== '' ? parseFloat(input.max) : 100;
-    var fill = opts.fillColor || '#818cf8';
-    var track = opts.trackColor || '#e4e4e7';
-    function paint() {
-      var v = parseFloat(input.value);
-      var pct = (max - min) === 0 ? 0 : ((v - min) / (max - min)) * 100;
-      input.style.background = 'linear-gradient(90deg, ' + fill + ' 0%, ' + fill + ' ' + pct + '%, ' + track + ' ' + pct + '%, ' + track + ' 100%)';
-      if (opts.onInput) { opts.onInput(v); }
-    }
-    input.addEventListener('input', paint, false);
-    paint();
-    return {
-      set: function (v) {
-        input.value = v;
-        paint();
-        if (opts.onChange) { opts.onChange(parseFloat(input.value)); }
-        return parseFloat(input.value);
-      },
-      value: function () { return parseFloat(input.value); }
-    };
-  }
-
-  function rating(container, value, opts) {
-    opts = opts || {};
-    function noop() {}
-    if (!container) { return { set: noop, value: function () { return 0; } }; }
-    var stars = container.querySelectorAll('.rt-star');
-    var n = stars.length;
-    var cur = 0;
-    function paint(v, animateLast) {
-      cur = Math.max(0, Math.min(n, Math.round(v)));
-      for (var i = 0; i < stars.length; i++) { stars[i].className = 'rt-star' + (i < cur ? ' on' : ''); }
-      if (animateLast && cur > 0 && !reduced()) {
-        var st = stars[cur - 1];
-        st.style.transition = 'none';
-        st.style.webkitTransition = 'none';
-        st.style.transform = 'scale(0.6)';
-        st.style.webkitTransform = 'scale(0.6)';
-        st.offsetWidth;
-        st.style.transition = 'transform .32s ' + EASE_SPRING;
-        st.style.webkitTransition = '-webkit-transform .32s ' + EASE_SPRING;
-        st.style.transform = 'scale(1)';
-        st.style.webkitTransform = 'scale(1)';
-        setTimeout(function () { st.style.transition = ''; st.style.transform = ''; st.style.webkitTransform = ''; }, 360);
-      }
-    }
-    paint(value != null ? value : 0, value != null);
-    for (var i = 0; i < stars.length; i++) {
-      (function (idx) { stars[idx].onclick = function () { set(idx + 1); }; })(i);
-    }
-    function set(v) { paint(v, true); if (opts.onChange) { opts.onChange(cur); } return cur; }
-    return { set: set, value: function () { return cur; } };
-  }
-
-  function applyAccent(color, root) {
-    root = root || (document.documentElement || document.body);
-    var c = _parseColor(color);
-    if (!root || !root.style || !root.style.setProperty) { return null; }
-    root.style.setProperty('--mv-accent', c ? color : '');
-    root.style.setProperty('--mv-accent-soft', c ? withAlpha(color, 0.16) : '');
-    root.style.setProperty('--mv-accent-fg', c ? colorMix(color, '#ffffff', 0.55) : '');
-    root.style.setProperty('--mv-accent-ink', c ? colorMix(color, '#000000', 0.45) : '');
-    return { accent: c ? color : null, soft: c ? withAlpha(color, 0.16) : null };
-  }
-
-  function palette(base, opts) {
-    opts = opts || {};
-    var out = {};
-    var steps = opts.steps || [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
-    var anchor = opts.anchor != null ? opts.anchor : 500;
-    for (var i = 0; i < steps.length; i++) {
-      var s = steps[i];
-      var t = (s - anchor) / 1000;
-      if (t > 0) { out[s] = colorMix(base, '#ffffff', Math.min(1, t)); }
-      else if (t < 0) { out[s] = colorMix(base, '#000000', Math.min(1, -t)); }
-      else { out[s] = base; }
-    }
-    out.base = base;
-    return out;
   }
 
   function reveal(el, open) {
@@ -2290,16 +2123,8 @@
     scrollSpy: scrollSpy,
     watchReducedMotion: watchReducedMotion,
     hoverLift: hoverLift,
-    colorOf: colorOf,
-    withAlpha: withAlpha,
-    colorMix: colorMix,
-    dominantFromImage: dominantFromImage,
     toggleSwitch: toggleSwitch,
     segmented: segmented,
-    stepper: stepper,
-    slider: slider,
-    rating: rating,
-    applyAccent: applyAccent,
-    palette: palette
+    stepper: stepper
   };
 });
